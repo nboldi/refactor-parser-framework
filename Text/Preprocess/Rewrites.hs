@@ -1,5 +1,7 @@
 module Text.Preprocess.Rewrites where
 
+import Debug.Trace
+
 import Data.Function
 import Text.Parsec
 import Text.Parsec.Pos
@@ -105,6 +107,18 @@ originalForm (RewriteSet rews) p
        return $ (res, takeBackAll procSrc procRng pos0)
   where takeBackAll str rng pos0
           = foldl (flip takeBack) str (map (`rewRelativelyTo` pos0) (filterInside rews))
+          where filterInside = filter ((`rangeInside` rng) . toRange)
+          
+-- | Gets the original form of a parsed entry, before it was preprocessed
+-- rewrites that happened on the beginning or end of the element are not taken back.
+originalForm' :: Monad m => RewriteSet -> ParsecT String u m a -> ParsecT String u m (a,String,SourceRange)
+originalForm' r@(RewriteSet rews) p 
+  = do inp <- getInput
+       (res, rng) <- captureSourceRange p
+       trace ("\n" ++ takeSourceRange (rngFromStart rng) inp ++ "\n" ++ shortShowRng rng ++ " -> " ++ shortShowRng (correctRange r rng)) $
+         return $ (res, takeBackAll inp rng, correctRange r rng)
+  where takeBackAll str rng
+          = foldl (flip takeBack) str (map (`rewRelativelyTo` (srcRangeBegin rng)) (filterInside rews))
           where filterInside = filter ((`rangeInside` rng) . toRange)
           
 correctRange :: RewriteSet -> SourceRange -> SourceRange

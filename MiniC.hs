@@ -297,6 +297,7 @@ prettyPrintSource p src
          
 prettyPrintTestFile fileName 
   = do src <- readFile fileName
+       -- parseWithPreproc (whole translationUnit) fileName src
        res <- parseWithPreproc (whole translationUnit) fileName src
        putStrLn $ either show (prettyPrint . transformSourceInfo) res
   

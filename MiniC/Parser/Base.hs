@@ -49,9 +49,9 @@ instance MonadState (CUserState a) (ParsecT CStream (CUserState a) CMonad) where
 -- | Adds node information to a parsed AST node.
 -- Composes the source template by cutting out children nodes.
 withInfo :: CParser (BI -> b) -> CParser b
-withInfo p = do inp <- getInput
-                (res, sr) <- captureSourceRange p
-                return $ res (NodeInfo (BasicInfo sr inp) emptySemaInfo)
+withInfo p = do rewrites <- ask
+                (res, inp, rng) <- originalForm' rewrites p
+                return $ res (NodeInfo (BasicInfo rng inp) emptySemaInfo)
                 
 -- | Orders the parsed AST node to compose it's node information from it's children.
 inheritInfo :: CParser (BI -> b BI) -> CParser (b BI)

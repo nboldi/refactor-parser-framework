@@ -12,6 +12,8 @@ import MiniC.TransformInfo
 import Text.Preprocess.Parser
 import Text.Preprocess.Rewrites
 
+import Debug.Trace
+
 import Text.Parsec
 import Text.Parsec.Error
 import Data.Either.Combinators
@@ -29,7 +31,8 @@ parseWithPreproc parser name src
   = do res <- runParserT (preprocessSource cPreproc) ((), initState name) name src
        case res of
            Right (preprocessed,((),st)) ->
-             return $ case runReader (runParserT parser initUserState name preprocessed) (rewrites st) of
+             trace (show $ rewrites st) $
+              return $ case runReader (runParserT parser initUserState name preprocessed) (rewrites st) of
                 Right tu -> Right tu
                 Left err -> Left $ setErrorPos (correctPos (rewrites st) (errorPos err)) err
            Left err -> return $ Left $ addErrorMessage (Message "Preprocessor failed") err
