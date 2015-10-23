@@ -5,8 +5,8 @@ module MiniC.RangeTree where
 
 import Text.Parsec.Pos
 import Text.Parsec.PosOps
-import MiniC.SourceNotation
 import MiniC.Representation
+import SourceCode.SourceNotation
 import SourceCode.SourceTree
 
 import Control.Lens

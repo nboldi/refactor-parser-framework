@@ -4,17 +4,17 @@
 
 module MiniLanguage where
 
-import MiniC.SourceNotation
-import SourceCode.ASTElems
-import SourceCode.ASTNode
-import SourceCode.ToSourceTree
-import SourceCode.SourceInfo
-
 import MiniC.Parser.Lexical (whole)
 import MiniC.Parser.Base
 import MiniC.Representation (BasicInfo)
 import MiniC.SymbolTable
 import MiniC.Semantics
+
+import SourceCode.SourceNotation
+import SourceCode.ASTElems
+import SourceCode.ASTNode
+import SourceCode.ToSourceTree
+import SourceCode.SourceInfo
 
 import Control.Applicative hiding ((<|>), many)
 import Control.Monad.State

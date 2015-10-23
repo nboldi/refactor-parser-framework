@@ -4,11 +4,12 @@
 -- to pretty print it with the original format.
 module MiniC.PrettyPrint where
 
-import SourceCode.SourceTree
-import SourceCode.ToSourceTree
-import MiniC.SourceNotation
 import MiniC.Representation
 import MiniC.RangeTree
+import SourceCode.SourceTree
+import SourceCode.ToSourceTree
+import SourceCode.SourceNotation
+
 import Data.Maybe
 import Data.List
 import Data.Function

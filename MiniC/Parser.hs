@@ -8,10 +8,6 @@
 -- is also incorporated into the parser.
 module MiniC.Parser where
 
-import SourceCode.ASTElems
-import SourceCode.Parsec
-import SourceCode.SourceInfo
-import SourceCode.ASTNode
 import MiniC.AST
 import MiniC.Representation
 import MiniC.Semantics(BI)
@@ -20,7 +16,12 @@ import MiniC.Helpers
 import MiniC.Parser.Lexical
 import MiniC.Parser.Expr
 import MiniC.Parser.Base
-import MiniC.SourceNotation
+
+import SourceCode.ASTElems
+import SourceCode.Parsec
+import SourceCode.SourceInfo
+import SourceCode.ASTNode
+import SourceCode.SourceNotation
 
 import GHC.Generics (Generic)
 import Text.Parsec

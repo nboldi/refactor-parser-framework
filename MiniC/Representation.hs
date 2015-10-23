@@ -7,7 +7,7 @@ module MiniC.Representation where
 import GHC.Generics (Generic)
 import SourceCode.ASTElems
 import MiniC.AST
-import MiniC.SourceNotation
+import SourceCode.SourceNotation
 import SourceCode.SourceTree
 import SourceCode.ToSourceTree
 import SourceCode.ASTNode

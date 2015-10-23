@@ -2,7 +2,7 @@
 {-# LANGUAGE MultiParamTypeClasses, OverlappingInstances, LambdaCase #-}
 
 -- | A module for representing how to print the AST in the original format
-module MiniC.SourceNotation where
+module SourceCode.SourceNotation where
 
 import SourceCode.ASTNode
 import SourceCode.SourceTree

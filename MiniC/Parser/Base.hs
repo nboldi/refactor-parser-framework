@@ -6,7 +6,6 @@
 module MiniC.Parser.Base where
 
 import MiniC.Representation
-import MiniC.SourceNotation
 import MiniC.SymbolTable
 import MiniC.Semantics
 import MiniC.Helpers
@@ -16,6 +15,7 @@ import SourceCode.ASTNode
 import SourceCode.ASTElems
 import SourceCode.SourceTree
 import SourceCode.SourceInfo
+import SourceCode.SourceNotation
 import Text.Preprocess.Rewrites
 
 import Data.Maybe
