@@ -6,13 +6,15 @@ module MiniC.GenTemplate where
 import MiniC.AST
 import MiniC.Instances
 import MiniC.Representation
-import MiniC.SourceNotation
-import SourceCode.SourceTree
-import SourceCode.ASTElems
 import MiniC.Semantics
 import Data.Maybe
 import Control.Lens
 import Debug.Trace
+
+import SourceCode.SourceNotation
+import SourceCode.SourceTree
+import SourceCode.ASTElems
+import SourceCode.InfoTypes
 
 import qualified Prelude
 import Prelude hiding (fromInteger)

@@ -7,7 +7,6 @@ module CTransform where
 import MiniC.ParseProgram
 import MiniC.Representation
 import MiniC.AST
-import MiniC.PrettyPrint
 import MiniC.GenTemplate
 import MiniC.Semantics
 import MiniC.Helpers
@@ -20,6 +19,8 @@ import SourceCode.ToSourceTree
 import SourceCode.ASTNode
 import SourceCode.RangeTree
 import SourceCode.SourceNotation
+import SourceCode.PrettyPrint
+import SourceCode.InfoTypes
 
 import Control.Monad
 import Control.Lens hiding ((<.>))
