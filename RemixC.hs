@@ -17,9 +17,9 @@ import MiniC.ParseProgram
 import MiniC.Parser
 import MiniC.Parser.Base
 import MiniC.Parser.Lexical
-import MiniC.PrettyPrint
 import MiniC.TransformInfo
 import Debug.Trace
+import SourceCode.PrettyPrint
 
 test = tests >>= runTestTT . TestList
 

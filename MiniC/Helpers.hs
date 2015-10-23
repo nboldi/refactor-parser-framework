@@ -8,7 +8,6 @@ import MiniC.Representation
 import MiniC.AST
 import MiniC.Instances
 import MiniC.Semantics
-import MiniC.PrettyPrint 
 import Data.Data
 import Data.Maybe
 import Control.Lens
@@ -17,6 +16,7 @@ import Control.Monad.State
 import Data.Data.Lens
 import SourceCode.ASTElems
 import SourceCode.SourceInfo
+import SourceCode.PrettyPrint 
 import Debug.Trace
 
 -- * AST utility functions

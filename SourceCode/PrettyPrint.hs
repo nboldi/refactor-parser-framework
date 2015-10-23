@@ -2,9 +2,8 @@
 
 -- | Adds source templates to a source tree and uses them 
 -- to pretty print it with the original format.
-module MiniC.PrettyPrint where
+module SourceCode.PrettyPrint where
 
-import MiniC.Representation
 import SourceCode.InfoTypes
 import SourceCode.RangeTree
 import SourceCode.SourceTree

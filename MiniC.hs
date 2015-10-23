@@ -14,7 +14,6 @@ import MiniC.SymbolTable
 import MiniC.Representation
 import MiniC.Helpers
 import MiniC.Instances
-import MiniC.PrettyPrint
 import MiniC.TransformInfo
 import Text.Preprocess.Parser
 import SourceCode.SourceNotation
@@ -22,6 +21,7 @@ import SourceCode.ToSourceTree (ToSourceRose)
 import SourceCode.SourceInfo (noNodeInfo)
 import SourceCode.ASTElems
 import SourceCode.InfoTypes
+import SourceCode.PrettyPrint
 
 import GHC.Generics
 import Text.Parsec

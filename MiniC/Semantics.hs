@@ -4,7 +4,6 @@ module MiniC.Semantics where
 
 import MiniC.AST
 import MiniC.Representation
-import MiniC.PrettyPrint
 
 import Control.Applicative
 import Control.Lens
@@ -18,6 +17,7 @@ import Data.Typeable
 import SourceCode.SourceInfo
 import SourceCode.ToSourceTree
 import SourceCode.InfoTypes
+import SourceCode.PrettyPrint
   
 
 type BI = NodeInfo BasicInfo SemaInfo
