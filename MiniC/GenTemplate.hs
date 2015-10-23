@@ -6,7 +6,7 @@ module MiniC.GenTemplate where
 import MiniC.AST
 import MiniC.Instances
 import MiniC.Representation
-import MiniC.SourceNotation
+import SourceCode.SourceNotation
 import SourceCode.SourceTree
 import SourceCode.ASTElems
 import MiniC.Semantics
