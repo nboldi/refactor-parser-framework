@@ -17,6 +17,7 @@ import Data.Maybe
 import Data.Typeable
 import SourceCode.SourceInfo
 import SourceCode.ToSourceTree
+import SourceCode.InfoTypes
   
 
 type BI = NodeInfo BasicInfo SemaInfo

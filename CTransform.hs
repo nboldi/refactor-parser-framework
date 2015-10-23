@@ -9,8 +9,6 @@ import MiniC.Representation
 import MiniC.AST
 import MiniC.PrettyPrint
 import MiniC.GenTemplate
-import MiniC.SourceNotation
-import MiniC.RangeTree
 import MiniC.Semantics
 import MiniC.Helpers
 import MiniC.SymbolTable
@@ -20,6 +18,8 @@ import MiniC.Instances
 import SourceCode.ASTElems
 import SourceCode.ToSourceTree
 import SourceCode.ASTNode
+import SourceCode.RangeTree
+import SourceCode.SourceNotation
 
 import Control.Monad
 import Control.Lens hiding ((<.>))

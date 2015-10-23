@@ -4,7 +4,6 @@
 module MiniC.TransformInfo where
 
 import MiniC.Representation
-import MiniC.RangeTree
 import MiniC.Semantics
 import Control.Lens
 import Control.Monad.State
@@ -12,9 +11,11 @@ import Control.Monad.Reader
 import Data.SmartTrav.Class
 import Data.Maybe
 import Text.Parsec.PosOps
+import SourceCode.RangeTree
 import SourceCode.SourceNotation
 import SourceCode.SourceTree
 import SourceCode.ToSourceTree
+import SourceCode.InfoTypes
 import Debug.Trace
 
         

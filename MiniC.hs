@@ -21,6 +21,7 @@ import SourceCode.SourceNotation
 import SourceCode.ToSourceTree (ToSourceRose)
 import SourceCode.SourceInfo (noNodeInfo)
 import SourceCode.ASTElems
+import SourceCode.InfoTypes
 
 import GHC.Generics
 import Text.Parsec

@@ -5,7 +5,8 @@
 module MiniC.PrettyPrint where
 
 import MiniC.Representation
-import MiniC.RangeTree
+import SourceCode.InfoTypes
+import SourceCode.RangeTree
 import SourceCode.SourceTree
 import SourceCode.ToSourceTree
 import SourceCode.SourceNotation

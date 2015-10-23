@@ -1,11 +1,11 @@
 {-# LANGUAGE NamedFieldPuns #-}
 
 -- | A 2-Dimensional R-Tree for intervals
-module MiniC.RangeTree where 
+module SourceCode.RangeTree where 
 
 import Text.Parsec.Pos
 import Text.Parsec.PosOps
-import MiniC.Representation
+import SourceCode.InfoTypes
 import SourceCode.SourceNotation
 import SourceCode.SourceTree
 

@@ -6,10 +6,10 @@ module MiniLanguage where
 
 import MiniC.Parser.Lexical (whole)
 import MiniC.Parser.Base
-import MiniC.Representation (BasicInfo)
 import MiniC.SymbolTable
 import MiniC.Semantics
 
+import SourceCode.InfoTypes (BasicInfo)
 import SourceCode.SourceNotation
 import SourceCode.ASTElems
 import SourceCode.ASTNode

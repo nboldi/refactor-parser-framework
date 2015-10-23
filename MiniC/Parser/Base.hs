@@ -16,6 +16,7 @@ import SourceCode.ASTElems
 import SourceCode.SourceTree
 import SourceCode.SourceInfo
 import SourceCode.SourceNotation
+import SourceCode.InfoTypes
 import Text.Preprocess.Rewrites
 
 import Data.Maybe
