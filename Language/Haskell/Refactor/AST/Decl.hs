@@ -7,23 +7,23 @@ import SourceCode.ASTElems
 data Decl a
   = TypeDecl { tdHead :: DeclHead a
              , tdType :: Type a
-             , tdInfo :: a
+             , declInfo :: a
              } -- ^ A type synonym ( @type String = [Char]@ )
   | TypeFamilyDecl { tfHead :: DeclHead a
                    , tfKind :: ASTMaybe Kind a
-                   , tfInfo :: a
+                   , declInfo :: a
                    } -- ^ A type family declaration
   | ClosedTypeFamilyDecl { ctfHead :: DeclHead a
                          , ctfKind :: ASTMaybe Kind a
                          , ctfDecl :: ASTList TypeEqn a
-                         , ctfInfo :: a
+                         , declInfo :: a
                          } -- ^ A closed type family declaration
   | DataDecl { ddType :: DataOrNewKeyword a
              , ddCtx  :: ASTMaybe Context a
              , ddHead :: DeclHead a
              , ddCons :: ASTList ConDecl a
              , ddDeriving :: ASTMaybe Deriving a
-             , ddInfo :: a
+             , declInfo :: a
              } -- ^ A data or newtype declaration.
   | GDataDecl { gddType :: DataOrNewKeyword a
               , gddCtx  :: ASTMaybe Context a
@@ -31,77 +31,73 @@ data Decl a
               , gddKind :: ASTMaybe Kind a
               , gddCons :: ASTList GadtDecl a
               , gddDeriving :: ASTMaybe Deriving a
-              , gddInfo :: a
+              , declInfo :: a
               } -- ^ A data or newtype declaration.
   | DataFamilyDecl { gddCtx  :: ASTMaybe Context a
                    , gddHead :: DeclHead a
                    , gddKind :: ASTMaybe Kind a
-                   , gddInfo :: a
+                   , declInfo :: a
                    } -- ^ Data family declaration
   | TypeInstDecl { tidInstance :: Type a
                  , tidAssignedType :: Type a
-                 , tidInfo :: a
+                 , declInfo :: a
                  } -- ^ Type instance declaration (@ type instance Fam T = AssignedT @)
   | DataInstDecl { didType :: DataOrNewKeyword a
                  , didInstance :: Type a
                  , didCons :: ASTList ConDecl a
-                 , didInfo :: a
+                 , declInfo :: a
                  } -- ^ Data instance declaration (@ data instance Fam T = Con1 | Con2 @)
   | GDataInstDecl { gdidType :: DataOrNewKeyword a
                   , gdidInstance :: Type a
                   , gdidKind :: Kind a
                   , gdidCons :: ASTList GadtDecl a
-                  , gdidInfo :: a
+                  , declInfo :: a
                   } -- ^ Data instance declaration (@ data instance T = Con1 | Con2 @)
   | ClassDecl { cdCtx :: Context a
               , cdHead :: DeclHead a
               , cdFunDeps :: ASTMaybe FunDeps a
               , cdBody :: ASTMaybe ClassBody a
-              , cdInfo :: a
+              , declInfo :: a
               } -- ^ Type class declaration (@ class X a [where f = ...] @)
   | InstDecl { idOverlap :: ASTMaybe OverlapPragma a
              , idInstRule :: InstanceRule a
              , idInstDecl :: ASTMaybe InstBody a
-             , idInfo :: a
+             , declInfo :: a
              } -- ^ Instance declaration (@ instance X T [where f = ...] @)
   | DerivDecl { drdOverlap :: ASTMaybe OverlapPragma a
               , drdInstRule :: InstanceRule a
-              , drdInfo :: a
+              , declInfo :: a
               } -- ^ Standalone deriving declaration (@ deriving instance X T @)
   | FixityDecl { fdAssoc :: Assoc a
                , fdPrecedence :: Precedence a
                , fdOperators :: ASTList Name a
+               , declInfo :: a
                }
   | DefaultDecl { dfdType :: Type a
-                , dfdInfo :: a
+                , declInfo :: a
                 } -- ^ Default types (@ default (T1, T2) @)
   | SpliceDecl { spdExpr :: Expr a
-               , spdInfo :: a
+               , declInfo :: a
                } -- ^ A Template Haskell splice declaration (@ $(generateDecls) @)
   | TypeSig { tsName :: Name a
             , tyType :: Type a
-            , tyInfo :: a
-            }
-  | FunBind { fbMatches :: ASTList Match a
-            , fbInfo :: a
-            }
-  | PatBind { pbPattern :: Pattern a
-            , pbRhs :: Rhs a
-            , pbBinds :: ASTMaybe Binds a
-            , pbInfo :: a
-            }
+            , declInfo :: a
+            } -- ^ type signature (@ f :: Int -> Int @)
+  | FunBind { declFunBind :: FunBind a
+            , declInfo :: a
+            } -- ^ function binding (@ f x = 12 @)
   | ForeignImport { fiCallConv :: CallConv a
                   , fiSafety :: ASTMaybe Safety a
                   , fiName :: Name a
                   , fiType :: Type a
-                  , fiInfo :: a
-                  }
+                  , declInfo :: a
+                  } -- ^ foreign import (@ foreign import foo :: Int -> IO Int @)
   | ForeignExport { feCallConv :: CallConv a
                   , feName :: Name a
                   , feType :: Type a
-                  , feInfo :: a
-                  }
-  | Pragma { tlPragma :: TopLevelPragma a }
+                  , declInfo :: a
+                  } -- ^ foreign export (@ foreign export ccall foo :: Int -> IO Int @)
+  | Pragma { tlPragma :: TopLevelPragma a } -- ^ top level pragmas
                  
 data DeclHead a
   = DeclHead { dhName :: Name a 
@@ -323,3 +319,86 @@ data ClassElement a
               , cldType :: Type a
               , cleInfo :: a
               } -- ^ default signature (by using DefaultSignatures): @ default enum :: (Generic a, GEnum (Rep a)) => [a] @
+       
+-- | Recognised overlaps for overlap pragmas.       
+data OverlapPragma a
+  = EnableOverlap { overlapInfo :: a } -- ^ NO_OVERLAP pragma
+  | DisableOverlap { overlapInfo :: a } -- ^ OVERLAP pragma
+  | IncoherentOverlap { overlapInfo :: a } -- ^ INCOHERENT pragma
+
+data InstBody a
+  = InstBody { instBodyDecls :: ASTList InstanceDecl a
+                 , instBodyInfo :: a
+                 }
+
+-- | Declarations inside an instance declaration.
+data InstBodyDecl a
+  = InstBodyNormalDecl { instBodyDeclFunbind :: FunBind a
+                       , instBodyDeclInfo :: a
+                       } -- ^ a normal declaration (@ f x = 12 @)
+  | InstBodyTypeDecl { instBodyLhsType :: Type a
+                     , instBodyRhsType :: Type a
+                     , instBodyDeclInfo :: a
+                     } -- ^ an associated type definition (@ type A X = B @)
+  | InstBodyDataDecl { instBodyDataNew :: DataOrNewKeyword a
+                     , instBodyLhsType :: Type a
+                     , instBodyDataCons :: ASTList ConDecl a
+                     , instBodyDerivings :: ASTMaybe Deriving a
+                     , instBodyDeclInfo :: a
+                     } -- ^ an associated data type implementation (@ data A X = C1 | C2 @)
+  | InstBodyGadtDataDecl { instBodyDataNew :: DataOrNewKeyword a
+                         , instBodyLhsType :: Type a
+                         , instBodyDataKind :: ASTMaybe Kind a
+                         , instBodyDataCons :: ASTList GadtDecl a
+                         , instBodyDerivings :: ASTMaybe Deriving a
+                         , instBodyDeclInfo :: a
+                         } -- ^ an associated data type implemented using GADT style
+
+-- | Function binding
+data FunBind a
+  = FunBind { funBindMatches :: ASTList Match a 
+            , funBindInfo :: a
+            }            
+             
+-- | Associativity of an operator.
+data Assoc a
+  = AssocNone { assocInfo :: a } -- ^ non-associative operator (declared with @infix@)
+  | AssocLeft { assocInfo :: a } -- ^ left-associative operator (declared with @infixl@)
+  | AssocRight { assocInfo :: a } -- ^ right-associative operator (declared with @infixr@)
+  
+-- | Numeric precedence of an operator
+data Precedence a
+  = Precedence { precedenceValue :: Int
+               , precedenceInfo :: a
+               }
+  
+-- | Haskell expressions
+data Expr a
+  = Var { exprName :: Name a
+        , exprInfo :: a
+        } -- ^ a variable (@ a @)
+  | ImplicitVar { exprName :: ImplicitName a
+                , exprInfo :: a
+                } -- ^ an implicit parameter (@ ?a @)
+  | Con { exprName :: Name a
+        , exprInfo :: a
+        } -- ^ data constructor (@Point@ in @Point 1 2@)
+  | Lit { exprLit :: Literal a
+        , exprInfo :: a
+        } -- ^ primitive literal
+  | InfixApp { exprLhs :: Expr a
+             , exprOperator :: Name a
+             , exprRhs :: Expr a
+             , exprInfo :: a
+             } -- ^ Infix operator application (@ a + b @)
+  | App { exprFun :: Expr a
+        , exprArg :: Expr a
+        , exprInfo :: a
+        } -- ^ Function application (@ f 4 @)
+  -- unary minus omitted
+  | Lambda { exprBindings :: ASTList Pattern a -- ^ at least one
+           , exprInner :: Expr a
+           , exprInfo :: a
+           } -- ^ lambda expression (@ \a b -> a + b @)
+  | Let { exprFunBind :: ASTList FunBind a
+        , 
