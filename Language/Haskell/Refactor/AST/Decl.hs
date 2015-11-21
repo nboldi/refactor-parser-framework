@@ -401,4 +401,94 @@ data Expr a
            , exprInfo :: a
            } -- ^ lambda expression (@ \a b -> a + b @)
   | Let { exprFunBind :: ASTList FunBind a
-        , 
+        , exprInner :: Expr a
+        , exprInfo :: a
+        }
+  | If { exprCond :: Expr a
+       , exprThen :: Expr a
+       , exprElse :: Expr a
+       , exprInfo :: a
+       }
+  | MultiIf { exprIfAlts :: ASTList GuardedLhs a
+            , exprInfo :: a
+            }
+  | Case { exprCase :: Expr a
+         , exprAlts :: ASTList Alt a
+         , exprInfo :: a
+         }
+  | Do { doKind :: DoKind a
+       , exprStmts :: ASTList Stmt a
+       , exprInfo :: a
+       }
+  | Tuple { boxed :: Boxed a
+          , tupleElems :: ASTList Expr a
+          , exprInfo :: a
+          }
+  | TupleSection { boxed :: Boxed a
+                 , tupleElems :: ASTList (ASTMaybe Expr) a
+                 , exprInfo :: a
+                 }
+  | List { listElems :: ASTList Expr a
+         , exprInfo :: a
+         } -- ^ List expression: @[1,2,3]@
+  | ParArray { listElems :: ASTList Expr a
+             , exprInfo :: a
+             } -- ^ Parallel array expression: @[: 1,2,3 :]@
+  | Paren { exprInner :: Expr a
+          , exprInfo :: a
+          }
+  | LeftSection { exprLhs :: Expr a
+                , exprOperator :: Name a
+                , exprInfo :: a
+                } -- ^ Left operator section: @(1+)@
+  | RightSection { exprOperator :: Name a
+                 , exprRhs :: Expr a
+                 , exprInfo :: a
+                 } -- ^ Right operator section: @(+1)@
+  | RecCtorExpr { exprRecName :: Name a
+                , exprRecFields :: ASTList FieldUpdate a
+                , exprInfo :: a
+                } -- ^ Record value construction: @Point { x = 3, y = -2 }@
+  | RecUpdateExpr { exprRecName :: Expr a
+                  , exprRecFields :: ASTList FieldUpdate a
+                  , exprInfo :: a
+                  } -- ^ Record value update: @p1 { x = 3, y = -2 }@
+  | Enum { enumFrom :: Expr a
+         , enumThen :: ASTMaybe Expr a
+         , enumTo :: ASTMaybe Expr a
+         , exprInfo :: a
+         }
+  | ParArrayEnum { enumFrom :: Expr a
+                 , enumThen :: ASTMaybe Expr a
+                 , enumTo :: Expr a
+                 , exprInfo :: a
+                 }
+  | ListComp { compExpr :: Expr a
+             , compBody :: ASTList CompStmt a
+             } -- ^ List comprehension  
+  | ParListComp { compExpr :: Expr a
+                , parCompBody :: ASTList (ASTList CompStmt) a
+                } -- ^ Parallel list comprehension: @ [ (x, y) | x <- xs | y <- ys ] @
+  | ParArrayComp { compExpr :: Expr a
+                 , parCompBody :: ASTList (ASTList CompStmt) a
+                 } -- ^ List comprehension  
+  | TypeSig { exprInner :: Expr a
+            , exprSig :: Type a
+            , exprInfo :: a
+            }
+  -- Template Haskell
+  | VarQuote { quotedName :: Name a
+             , exprInfo :: a
+             } -- ^ @'x@ for template haskell reifying of expressions
+  | TypeQuote { quotedName :: Name a
+              , exprInfo :: a
+              } -- ^ @''T@ for template haskell reifying of types
+  | BracketExpr { bracketType :: Bracket a
+                , innerExpr :: Expr a
+                , exprInfo :: a
+                } -- ^ template haskell bracket expression, for example: @[| x |]@
+  | Splice { innerExpr :: Expr a
+           , exprInfo :: a
+           } -- ^ template haskell splice expression, for example: @$(gen a)@ or @$x@
+  | QuasiQuote -- ??
+        
