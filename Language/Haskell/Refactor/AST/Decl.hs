@@ -79,13 +79,13 @@ data Decl a
   | SpliceDecl { spdExpr :: Expr a
                , declInfo :: a
                } -- ^ A Template Haskell splice declaration (@ $(generateDecls) @)
-  | TypeSig { tsName :: Name a
-            , tyType :: Type a
-            , declInfo :: a
-            } -- ^ type signature (@ f :: Int -> Int @)
-  | FunBind { declFunBind :: FunBind a
-            , declInfo :: a
-            } -- ^ function binding (@ f x = 12 @)
+  | TypeSignature { tsName :: Name a
+                  , tyType :: Type a
+                  , declInfo :: a
+                  } -- ^ type signature (@ f :: Int -> Int @)
+  | FunBinding { declFunBind :: FunBind a
+               , declInfo :: a
+               } -- ^ function binding (@ f x = 12 @)
   | ForeignImport { fiCallConv :: CallConv a
                   , fiSafety :: ASTMaybe Safety a
                   , fiName :: Name a
@@ -114,7 +114,13 @@ data DeclHead a
             , dhInfixLeft :: TyVar a
             , dhInfo :: a
             } -- ^ infix application of the type/class name to the left operand
-                 
+           
+data TyVar a 
+  = TyVarDecl { tyVarName :: Name a
+              , tyVarKind :: ASTMaybe Kind a
+              , tyVarInfo :: a
+              }
+           
 data Type a
   = TyForall { tfaBounded :: ASTMaybe TyVar a
              , tfaCtx :: ASTMaybe Context a
@@ -191,10 +197,7 @@ data TypeEqn a
             , teRhs :: Type a
             , teInfo :: a
             } -- ^ type equations as found in closed type families (@ T A = S @)
-  
-data DataOrNewKeyword a
-  = DataKeyword { dataKeywordInfo :: a }
-  | NewdataKeyword { newdataKeywordInfo :: a }
+
   
 data Context a
   = ContextOne { contextAssertion :: Assertion a
@@ -359,18 +362,6 @@ data FunBind a
   = FunBind { funBindMatches :: ASTList Match a 
             , funBindInfo :: a
             }            
-             
--- | Associativity of an operator.
-data Assoc a
-  = AssocNone { assocInfo :: a } -- ^ non-associative operator (declared with @infix@)
-  | AssocLeft { assocInfo :: a } -- ^ left-associative operator (declared with @infixl@)
-  | AssocRight { assocInfo :: a } -- ^ right-associative operator (declared with @infixr@)
-  
--- | Numeric precedence of an operator
-data Precedence a
-  = Precedence { precedenceValue :: Int
-               , precedenceInfo :: a
-               }
   
 -- | Haskell expressions
 data Expr a
@@ -420,10 +411,12 @@ data Expr a
        , exprStmts :: ASTList Stmt a
        , exprInfo :: a
        }
-  | Tuple { boxed :: Boxed a
-          , tupleElems :: ASTList Expr a
+  | Tuple { tupleElems :: ASTList Expr a
           , exprInfo :: a
           }
+  | UnboxedTuple { tupleElems :: ASTList Expr a
+                 , exprInfo :: a
+                 }
   | TupleSection { boxed :: Boxed a
                  , tupleElems :: ASTList (ASTMaybe Expr) a
                  , exprInfo :: a
@@ -490,5 +483,80 @@ data Expr a
   | Splice { innerExpr :: Expr a
            , exprInfo :: a
            } -- ^ template haskell splice expression, for example: @$(gen a)@ or @$x@
-  | QuasiQuote -- ??
-        
+  | QuasiQuote { qqExprName :: Name a
+               , qqExprBody :: QQString a
+               , exprInfo :: a
+               } -- ^ template haskell quasi-quotation: @[$quoter|str]@
+  | ExprPragma { exprPragma :: ExprPragma a }
+  -- Arrows
+  | Proc { procPattern :: Pattern a
+         , procExpr :: Expr a
+         , exprInfo :: a
+         }
+  | ArrowApp { exprLhs :: Expr a
+             , arrowAppl :: ArrowAppl
+             , exprRhs :: Expr a
+             }
+  | LamCase { exprAlts :: ASTList Alt a
+            , exprInfo :: a
+            } -- ^ lambda case: @\case 0 -> 1; 1 -> 2@
+  -- XML expressions omitted
+             
+data Pattern a
+  = VarPat { patternName :: Name a
+           , patternInfo :: a
+           }
+  | LitPat { patternLiteral :: Literal a
+           , patternInfo :: a
+           }
+  | InfixPat { patternLhs :: Pattern a
+             , patternOp :: Name a
+             , patternRhs :: Pattern a
+             , patternInfo :: a
+             }
+  | AppPat { patternCon :: Name a
+           , patternArg :: Pattern a
+           , patternInfo :: a
+           }
+  | TuplePat { patternElems :: ASTList Pattern a
+             , patternInfo :: a
+             }
+  | UnboxTuplePat { patternElems :: ASTList Pattern a
+                  , patternInfo :: a
+                  }
+  | ListPat { patternElems :: ASTList Pattern a
+            , patternInfo :: a
+            }
+  | ParenPat { patternInner :: Pattern a
+             , patternInfo :: a
+             }
+  | RecPat { patternName :: Name a
+           , patternFields :: ASTList PatternField a
+           , patternInfo :: a
+           }
+  | AsPat { patternName :: Name a
+          , patternInner :: Pattern a
+          , patternInfo :: a
+          } -- ^ As-pattern: @ls\@(hd:_)@
+  | WildPat { patternInfo :: a } -- ^ Wildcard pattern: @_@
+  | IrrPat { patternInner :: Pattern a
+           , patternInfo :: a
+           } -- ^ Irrefutable pattern: @~(x:_)@
+  | BangPat { patternInner :: Pattern a
+            , patternInfo :: a
+            } -- ^ Bang pattern: @!x@
+  | TypeSigPat { patternInner :: Pattern a
+               , patternType :: Type a
+               , patternInfo :: a
+               } -- ^ Pattern with type signature: @_ :: Int@
+  | ViewPat { patternExpr :: Expr a
+            , patternInner :: Pattern a
+            , patternInfo :: a
+            } -- ^ View pattern: @f -> Just 1@
+  -- regular list pattern omitted
+  -- xml patterns omitted
+  | QuasiQuotePat { qqPatternName :: Name a
+                  , qqPatternBody :: QQString a
+                  , patternInfo :: a
+                  }
+                  
