@@ -5,19 +5,12 @@ import SourceCode.ASTElems
 data QName a = QName { qualifiers :: ASTList Name a
                      , unqualifiedName :: Name a 
                      }
-                     
+  
+-- | Contains also implicit names.
+-- Linear implicit parameter: @%x@. Non-linear implicit parameter: @?x@.
 data Name a = Name { nameStr :: String
                    , nameInfo :: a
-                   }  
-data ImplicitName a 
-  = LinearImplName { implNameStr :: String
-                   , implNameInfo :: a
-                   } -- ^ Linear implicit parameter: @%x@
-  | NormalImplName { implNameStr :: String
-                   , implNameInfo :: a
-                   } -- ^ Non-linear implicit parameter: @?x@
-
-  
+                   }    
 data DataOrNewKeyword a
   = DataKeyword { dataKeywordInfo :: a }
   | NewdataKeyword { dataKeywordInfo :: a }

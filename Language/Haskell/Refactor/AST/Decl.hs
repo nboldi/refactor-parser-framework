@@ -409,10 +409,6 @@ data Assertion a
                     , assertRhs :: Type a
                     , assertInfo :: a
                     }
-  | ImplParamAssert { assertParam :: ImplicitName a
-                    , assertType :: Type a
-                    , assertInfo :: a
-                    }
   | EqualAssert     { assertLhs :: Type a
                     , assertRhs :: Type a
                     , assertInfo :: a
@@ -429,9 +425,6 @@ data Expr a
   = Var               { exprName :: Name a
                       , exprInfo :: a
                       } -- ^ a variable (@ a @)
-  | ImplicitVar       { exprImplName :: ImplicitName a
-                      , exprInfo :: a
-                      } -- ^ an implicit parameter (@ ?a @)
   | Con               { exprName :: Name a
                       , exprInfo :: a
                       } -- ^ data constructor (@Point@ in @Point 1 2@)
@@ -687,15 +680,6 @@ data Binds a
   = DeclBindings     { bindingDecls :: ASTList Decl a
                      , bindingInfo :: a
                      }
-  | ImplicitBindings { bindingImplDecls :: ASTList ImplBind a
-                     , bindingInfo :: a
-                     }
-                     
-data ImplBind a
-  = ImplBind { implBindName :: ImplicitName a
-             , implBindExpr :: Expr a
-             , implBindInfo :: a
-             }
    
 -- | Clause of function binding   
 data Match a
