@@ -8,14 +8,49 @@ data QName a = QName { qualifiers :: ASTList Name a
                      
 data Name a = Name { nameStr :: String
                    , nameInfo :: a
-                   }
+                   }  
+data ImplicitName a 
+  = LinearImplName { implNameStr :: String
+                   , implNameInfo :: a
+                   } -- ^ Linear implicit parameter: @%x@
+  | NormalImplName { implNameStr :: String
+                   , implNameInfo :: a
+                   } -- ^ Non-linear implicit parameter: @?x@
 
   
 data DataOrNewKeyword a
   = DataKeyword { dataKeywordInfo :: a }
-  | NewdataKeyword { newdataKeywordInfo :: a }
+  | NewdataKeyword { dataKeywordInfo :: a }
+    
+data DoKind a
+  = DoKeyword { doKeywordInfo :: a }
+  | MDoKeyword { doKeywordInfo :: a }
   
-             
+data TypeKeyword a
+  = TypeKeyword { typeKeywordInfo :: a }
+  
+data CallConv a
+  = StdCall    { callConvInfo :: a }
+  | CCall      { callConvInfo :: a }
+  | CPlusPlus  { callConvInfo :: a }
+  | DotNet     { callConvInfo :: a }
+  | Jvm        { callConvInfo :: a }
+  | Js         { callConvInfo :: a }
+  | JavaScript { callConvInfo :: a }
+  | CApi       { callConvInfo :: a }
+  
+data ArrowAppl a
+  = LeftAppl     { arrowApplInfo :: a }
+  | RightAppl    { arrowApplInfo :: a }
+  | LeftHighApp  { arrowApplInfo :: a }
+  | RightHighApp { arrowApplInfo :: a }
+  
+data Safety a
+  = Safe          { safetyKeywordInfo :: a }
+  | ThreadSafe    { safetyKeywordInfo :: a }
+  | Unsafe        { safetyKeywordInfo :: a }
+  | Interruptible { safetyKeywordInfo :: a }
+
 -- | Associativity of an operator.
 data Assoc a
   = AssocNone { assocInfo :: a } -- ^ non-associative operator (declared with @infix@)
@@ -27,3 +62,51 @@ data Precedence a
   = Precedence { precedenceValue :: Int
                , precedenceInfo :: a
                }
+               
+data Literal a
+  = CharLit       { charLitValue :: Char 
+                  , literalInfo :: a
+                  }
+  | StringLit     { stringLitValue :: String 
+                  , literalInfo :: a
+                  }
+  | IntLit        { intLitValue :: Integer 
+                  , literalInfo :: a
+                  }
+  | FracLit       { fracLitValue :: Rational
+                  , literalInfo :: a
+                  }
+  | PrimIntLit    { intLitValue :: Integer
+                  , literalInfo :: a
+                  }
+  | PrimFloatLit  { floatLitValue :: Rational
+                  , literalInfo :: a
+                  }
+  | PrimDoubleLit { floatLitValue :: Rational
+                  , literalInfo :: a
+                  }
+  | PrimCharLit   { charLitValue :: Char 
+                  , literalInfo :: a
+                  }
+  | PrimStringLit { stringLitValue :: String 
+                  , literalInfo :: a
+                  }
+               
+data Promoted a
+  = PromotedInt    { promotedIntValue :: Integer
+                   , promotedInfo :: a
+                   }
+  | PromotedString { promotedStringValue :: String
+                   , promotedInfo :: a
+                   }
+  | PromotedCon    { promotedConName :: Name a
+                   , promotedInfo :: a
+                   }
+  | PromotedList   { promotedElements :: ASTList Promoted a
+                   , promotedInfo :: a
+                   }
+  | PromotedTuple  { promotedElements :: ASTList Promoted a
+                   , promotedInfo :: a
+                   }
+  | PromotedUnit   { promotedInfo :: a }
+               

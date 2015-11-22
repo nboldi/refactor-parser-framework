@@ -97,204 +97,9 @@ data Decl a
                   , feType :: Type a
                   , declInfo :: a
                   } -- ^ foreign export (@ foreign export ccall foo :: Int -> IO Int @)
-  | Pragma { tlPragma :: TopLevelPragma a } -- ^ top level pragmas
-                 
-data DeclHead a
-  = DeclHead { dhName :: Name a 
-             , dhInfo :: a
-             } -- ^ type or class name
-  | DHParen { dhBody :: DeclHead a
-            , dhInfo :: a
-            }
-  | DHApp { dhAppFun :: DeclHead a
-          , dhAppOperand :: TyVar a 
-          , dhInfo :: a
-          }
-  | DHInfix { dhInfixName :: Name a 
-            , dhInfixLeft :: TyVar a
-            , dhInfo :: a
-            } -- ^ infix application of the type/class name to the left operand
-           
-data TyVar a 
-  = TyVarDecl { tyVarName :: Name a
-              , tyVarKind :: ASTMaybe Kind a
-              , tyVarInfo :: a
-              }
-           
-data Type a
-  = TyForall { tfaBounded :: ASTMaybe TyVar a
-             , tfaCtx :: ASTMaybe Context a
-             , tfaType :: Type a
-             , tfaInfo :: a
-             } -- ^ forall types (@ forall x y . type @)
-  | TyFun { tfParam :: Type a
-          , tfResult :: Type a
-          , tfaType :: Type a
-          } -- ^ function types (@ a -> b @)
-  | TyTuple { ttElements :: ASTList Type a
-            , ttInfo :: a
-            } -- ^ tuple types (@ (a,b) @)
-  | TyUnbTuple { ttElements :: ASTList Type a
-               , ttInfo :: a
-               } -- ^ unboxed tuple types (@ (#a,b#) @)
-  | TyList { tlElement :: Type a
-           , tlInfo :: a 
-           } -- ^ list type with special syntax (@ [a] @)
-  | TyParArray { tpaElement :: Type a
-               , tpaInfo :: a 
-               } -- ^ parallel array type (@ [:a:] @)
-  | TyApp { taCon :: Type a
-          , taArg :: Type a
-          , taInfo :: a
-          } -- ^ type constructor application (@ F a @)
-  | TyVar { tvName :: Name a } -- ^ type variable (@ a @)
-  | TyCon { tcName :: Name a } -- ^ type constructor (@ T @)
-  | TyParen { tpType :: Type a, tpInfo :: a } -- ^ type surrounded by parentheses (@ (T a) @)
-  | TyInfix { tiLeft :: Type a 
-            , tiOperator :: Name a
-            , tiRight :: Type a
-            , tkInfo :: a
-            } -- ^ infix type constructor (@ (a <: b) @)
-  | TyKinded { tkType :: Type a
-             , tkKind :: Kind a
-             , tkInfo :: a
-             } -- ^ type with explicit kind signature (@ a :: * @)
-  | TyPromoted { tpPromoted :: Promoted a } -- a promoted data type with -XDataKinds (@ '3 @).
-  | TySplice { tsSplice :: Splice a
-             , tsInfo :: a
-             } -- ^ a Template Haskell splice type (@ $(genType) @).
-  | TyBang { tbBang :: BangType a
-           , tbType :: Type a
-           , tbInfo :: a
-           } -- ^ Strict type marked with "!" or type marked with UNPACK pragma.
-
-data Kind a
-  = KindStar { kindInfo :: a } -- ^ *, the kind of types
-  | KindBang { kindInfo :: a } -- ^ !, the kind of unboxed types
-  | KindFn { kindLeft :: Kind a
-           , kindRight :: Kind a
-           , kindInfo :: a
-           } -- ^ ->, the kind of type constructor
-  | KindParen { kindParen :: Kind a
-              , kindInfo :: a 
-              } -- ^ a parenthesised kind
-  | KindVar { kindVar :: Name a
-            , kindInfo :: a 
-            } -- ^ kind variable (using PolyKinds extension)
-  | KindApp { kindAppFun :: Kind a
-            , kindAppArg :: Kind a 
-            , kindInfo :: a 
-            } -- ^ kind application (@ k1 k2 @)
-  | KindTuple { kindTuple :: ASTList Kind a
-              , kindInfo :: a 
-              } -- ^ a promoted tuple (@ '(k1,k2,k3) @)
-  | KindList { kindList :: ASTList Kind a
-             , kindInfo :: a 
-             } -- ^ a promoted list literal (@ '[k1,k2,k3] @)
-  
-data TypeEqn a
-  = TypeEqn { teLhs :: Type a
-            , teRhs :: Type a
-            , teInfo :: a
-            } -- ^ type equations as found in closed type families (@ T A = S @)
-
-  
-data Context a
-  = ContextOne { contextAssertion :: Assertion a
-               , contextInfo :: a
-               } -- ^ one assertion (@ C a => ... @)
-  | ContextMulti { contextAssertions :: ASTList Assertion a
-                 , contextInfo :: a
-                 } -- ^ a set of assertions (@ (C1 a, C2 b) => ... @, but can be one: @ (C a) => ... @)
-  
-data ConDecl a
-  = ConDecl { conDeclName :: Name a
-            , conDeclArgs :: ASTList Type a
-            , conDeclInfo :: a
-            } -- ^ ordinary data constructor (@ C t1 t2 @)
-  | RecordDecl { conDeclName :: Name a
-               , conDeclArgs :: ASTList FieldDecl a
-               , conDeclInfo :: a
-               } -- ^ record data constructor (@ C { n1 :: t1, n2 :: t2 } @)
-  | InfixConDecl { icdName :: Name a
-                 , icdLhs :: Type a
-                 , icdRhs :: Type a
-                 , icdInfo :: a
-                 } -- ^ infix data constructor (@ t1 :+: t2 @)
-  
--- | A deriving clause following a data type declaration. (@ deriving Show @ or @ deriving (Show, Eq) @)
-data Deriving a
-  = DerivingOne { derived :: InstanceRule a
-                , derivingInfo :: a
-                }
-  | Derivings { derived :: ASTList InstanceRule a
-              , derivingInfo :: a
-              }
-  
--- | The instance declaration rule, which is, roughly, the part of the instance declaration before the where keyword.
-data InstanceRule a
-  = InstanceRule { irVars :: ASTMaybe (ASTList TypeVar) a
-                 , irCtx :: ASTMaybe Context a
-                 , irHead :: InstanceHead a
-                 , irInfo :: a
-                 }
-  | InstanceParen { irRule :: InstanceRule a
-                  , irInfo :: a
-                  }
-
-data InstanceHead a
-  = InstanceHeadCon { ihConName :: Name a
-                    , ihInfo :: a
-                    } -- ^ type or class name
-  | InstanceHeadInfix { ihLeftOp :: Type a
-                      , ihOperator :: Name a
-                      , ihInfo :: a
-                      } -- ^ infix application of the type/class name to the left operand
-  | InstanceHeadParen { ihHead :: InstanceHead a
-                      , ihInfo :: a
-                      } -- ^ parenthesized instance head
-  | InstanceHeadApp { ihFun :: InstanceHead a
-                    , ihType :: Type a
-                    , ihInfo :: a
-                    } -- ^ application to one more type
-  
--- | A single constructor declaration in a GADT data type declaration.
---
--- If the GADT is declared using the record syntax, e.g.
---
--- >data Ty where
--- >  TCon :: { field1 :: Int, field2 :: Bool } -> Ty
---
--- then the fields are stored as a list of 'FieldDecl's, and the final type
--- (@Ty@ in the above example) is stored in the last 'Type' field.
---
--- If the GADT is declared using the ordinary syntax, e.g.
---
--- >data Ty where
--- >  TCon :: Int -> Bool -> Ty
---
--- then @'Maybe' ['FieldDecl' l]@ is 'Nothing', and the whole constructor's
--- type (such as @Int -> Bool -> Ty@) is stored in the last 'Type' field.  
-data GadtDecl a
-  = GadtDecl { gdName :: Name a
-             , gdFields :: ASTMaybe (ASTList FieldDecl) a
-             , gdType :: Type a
-             , gdInfo :: a
-             }
-         
--- | A list of functional dependencies: @ ... | a -> b, c -> d @         
-data FunDeps a
-  = FunDeps { funDeps :: ASTList FunDep a
-            , funDepsInfo :: a
-            }
-         
--- | A functional dependency, given on the form @l1 ... ln -> r1 ... rn@         
-data FunDep a
-  = FunDep { funDepLhs :: ASTList Name a
-           , funDepRhs :: ASTList Name a
-           , funDepInfo :: a
-           }
-           
+  -- | Pragma { tlPragma :: TopLevelPragma a } -- ^ top level pragmas
+       
+   
 -- | The list of declarations that can appear in a typeclass
 data ClassBody a
   = ClassBody { cbElements :: ASTList ClassElement a
@@ -323,6 +128,22 @@ data ClassElement a
               , cleInfo :: a
               } -- ^ default signature (by using DefaultSignatures): @ default enum :: (Generic a, GEnum (Rep a)) => [a] @
        
+data DeclHead a
+  = DeclHead { dhName :: Name a 
+             , dhInfo :: a
+             } -- ^ type or class name
+  | DHParen  { dhBody :: DeclHead a
+             , dhInfo :: a
+             }
+  | DHApp    { dhAppFun :: DeclHead a
+             , dhAppOperand :: TyVar a 
+             , dhInfo :: a
+             }
+  | DHInfix  { dhInfixName :: Name a 
+             , dhInfixLeft :: TyVar a
+             , dhInfo :: a
+             } -- ^ infix application of the type/class name to the left operand
+       
 -- | Recognised overlaps for overlap pragmas.       
 data OverlapPragma a
   = EnableOverlap { overlapInfo :: a } -- ^ NO_OVERLAP pragma
@@ -330,178 +151,456 @@ data OverlapPragma a
   | IncoherentOverlap { overlapInfo :: a } -- ^ INCOHERENT pragma
 
 data InstBody a
-  = InstBody { instBodyDecls :: ASTList InstanceDecl a
-                 , instBodyInfo :: a
-                 }
+  = InstBody { instBodyDecls :: ASTList InstBodyDecl a
+             , instBodyInfo :: a
+             }
 
 -- | Declarations inside an instance declaration.
 data InstBodyDecl a
-  = InstBodyNormalDecl { instBodyDeclFunbind :: FunBind a
-                       , instBodyDeclInfo :: a
-                       } -- ^ a normal declaration (@ f x = 12 @)
-  | InstBodyTypeDecl { instBodyLhsType :: Type a
-                     , instBodyRhsType :: Type a
-                     , instBodyDeclInfo :: a
-                     } -- ^ an associated type definition (@ type A X = B @)
-  | InstBodyDataDecl { instBodyDataNew :: DataOrNewKeyword a
-                     , instBodyLhsType :: Type a
-                     , instBodyDataCons :: ASTList ConDecl a
-                     , instBodyDerivings :: ASTMaybe Deriving a
-                     , instBodyDeclInfo :: a
-                     } -- ^ an associated data type implementation (@ data A X = C1 | C2 @)
+  = InstBodyNormalDecl   { instBodyDeclFunbind :: FunBind a
+                         , instBodyDeclInfo :: a
+                         } -- ^ a normal declaration (@ f x = 12 @)
+  | InstBodyTypeDecl     { instBodyLhsType :: Type a
+                         , instBodyRhsType :: Type a
+                         , instBodyDeclInfo :: a
+                         } -- ^ an associated type definition (@ type A X = B @)
+  | InstBodyDataDecl     { instBodyDataNew :: DataOrNewKeyword a
+                         , instBodyLhsType :: Type a
+                         , instBodyDataCons :: ASTList ConDecl a
+                         , instBodyDerivings :: ASTMaybe Deriving a
+                         , instBodyDeclInfo :: a
+                         } -- ^ an associated data type implementation (@ data A X = C1 | C2 @)
   | InstBodyGadtDataDecl { instBodyDataNew :: DataOrNewKeyword a
                          , instBodyLhsType :: Type a
                          , instBodyDataKind :: ASTMaybe Kind a
-                         , instBodyDataCons :: ASTList GadtDecl a
+                         , instBodyGadtCons :: ASTList GadtDecl a
                          , instBodyDerivings :: ASTMaybe Deriving a
                          , instBodyDeclInfo :: a
                          } -- ^ an associated data type implemented using GADT style
+                         
+  
 
+data GadtDecl a
+  = GadtDecl { gdName :: Name a
+             , gdFields :: ASTMaybe (ASTList FieldDecl) a
+             , gdType :: Type a
+             , gdInfo :: a
+             }
+         
+-- | A list of functional dependencies: @ ... | a -> b, c -> d @         
+data FunDeps a
+  = FunDeps { funDeps :: ASTList FunDep a
+            , funDepsInfo :: a
+            }
+         
+-- | A functional dependency, given on the form @l1 ... ln -> r1 ... rn@         
+data FunDep a
+  = FunDep { funDepLhs :: ASTList Name a
+           , funDepRhs :: ASTList Name a
+           , funDepInfo :: a
+           }
+           
+  
+data ConDecl a
+  = ConDecl { conDeclName :: Name a
+            , conDeclArgs :: ASTList Type a
+            , conDeclInfo :: a
+            } -- ^ ordinary data constructor (@ C t1 t2 @)
+  | RecordDecl { conDeclName :: Name a
+               , conDeclFields :: ASTList FieldDecl a
+               , conDeclInfo :: a
+               } -- ^ record data constructor (@ C { n1 :: t1, n2 :: t2 } @)
+  | InfixConDecl { icdName :: Name a
+                 , icdLhs :: Type a
+                 , icdRhs :: Type a
+                 , icdInfo :: a
+                 } -- ^ infix data constructor (@ t1 :+: t2 @)
+  
+data FieldDecl a
+  = FieldDecl { fieldNames :: ASTList Name a
+              , fieldType :: Type a
+              , fieldInfo :: a
+              }
+  
+-- | A deriving clause following a data type declaration. (@ deriving Show @ or @ deriving (Show, Eq) @)
+data Deriving a
+  = DerivingOne { oneDerived :: InstanceRule a
+                , derivingInfo :: a
+                }
+  | Derivings   { allDerived :: ASTList InstanceRule a
+                , derivingInfo :: a
+                }
+  
+-- | The instance declaration rule, which is, roughly, the part of the instance declaration before the where keyword.
+data InstanceRule a
+  = InstanceRule { irVars :: ASTMaybe (ASTList TyVar) a
+                 , irCtx :: ASTMaybe Context a
+                 , irHead :: InstanceHead a
+                 , irInfo :: a
+                 }
+  | InstanceParen { irRule :: InstanceRule a
+                  , irInfo :: a
+                  }
+
+data InstanceHead a
+  = InstanceHeadCon { ihConName :: Name a
+                    , ihInfo :: a
+                    } -- ^ type or class name
+  | InstanceHeadInfix { ihLeftOp :: Type a
+                      , ihOperator :: Name a
+                      , ihInfo :: a
+                      } -- ^ infix application of the type/class name to the left operand
+  | InstanceHeadParen { ihHead :: InstanceHead a
+                      , ihInfo :: a
+                      } -- ^ parenthesized instance head
+  | InstanceHeadApp { ihFun :: InstanceHead a
+                    , ihType :: Type a
+                    , ihInfo :: a
+                    } -- ^ application to one more type
+        
+data TypeEqn a
+  = TypeEqn { teLhs :: Type a
+            , teRhs :: Type a
+            , teInfo :: a
+            } -- ^ type equations as found in closed type families (@ T A = S @)
+   
+-- data TopLevelPragma a
+  -- = RulePragma    { pragmaRule :: ASTList Rule a
+                  -- , pragmaInfo :: a
+                  -- }
+  -- | DeprPragma    { pragmaObjects :: ASTList Name a
+                  -- , pragmaMessage :: String
+                  -- , pragmaInfo :: a
+                  -- }
+  -- | WarningPragma { pragmaObjects :: ASTList Name a
+                  -- , pragmaMessage :: String
+                  -- , pragmaInfo :: a
+                  -- }
+  -- | AnnPragma     { pragmaAnnotation :: Annotation a
+                  -- , pragmaInfo :: a
+                  -- }
+  -- | MinimalPragma { pragmaFormula :: Maybe MinimalFormula a
+                  -- , pragmaInfo :: a
+                  -- }
+                  
+-- data Annotation a
+  -- = NameAnnotation   { annotateType :: ASTMaybe TypeKeyword
+                     -- , annotateName :: Name a
+                     -- , annotateExpr :: Expr a
+                     -- , annotatoinInfo :: a
+                     -- }
+  -- | ModuleAnnotation { annotateExpr :: Expr a
+                     -- , annotatoinInfo :: a
+                     -- }
+                     
+-- Rule pragmas omitted
+   
+----------------------------------------------------
+-- Types -------------------------------------------
+----------------------------------------------------
+   
+data TyVar a 
+  = TyVarDecl { tyVarName :: Name a
+              , tyVarKind :: ASTMaybe Kind a
+              , tyVarInfo :: a
+              }
+           
+data Type a
+  = TyForall   { tfaBounded :: ASTMaybe TyVar a
+               , tfaCtx :: ASTMaybe Context a
+               , tfaType :: Type a
+               , typeInfo :: a
+               } -- ^ forall types (@ forall x y . type @)
+  | TyFun      { tfParam :: Type a
+               , tfResult :: Type a
+               , tfaType :: Type a
+               , typeInfo :: a
+               } -- ^ function types (@ a -> b @)
+  | TyTuple    { ttElements :: ASTList Type a
+               , typeInfo :: a
+               } -- ^ tuple types (@ (a,b) @)
+  | TyUnbTuple { ttElements :: ASTList Type a
+               , typeInfo :: a
+               } -- ^ unboxed tuple types (@ (#a,b#) @)
+  | TyList     { tlElement :: Type a
+               , typeInfo :: a 
+               } -- ^ list type with special syntax (@ [a] @)
+  | TyParArray { tpaElement :: Type a
+               , typeInfo :: a 
+               } -- ^ parallel array type (@ [:a:] @)
+  | TyApp      { taCon :: Type a
+               , taArg :: Type a
+               , typeInfo :: a
+               } -- ^ type constructor application (@ F a @)
+  | TyVar      { tvName :: Name a
+               , typeInfo :: a
+               } -- ^ type variable (@ a @)
+  | TyCon      { tcName :: Name a
+               , typeInfo :: a
+               } -- ^ type constructor (@ T @)
+  | TyParen    { tpType :: Type a
+               , typeInfo :: a 
+               } -- ^ type surrounded by parentheses (@ (T a) @)
+  | TyInfix    { tiLeft :: Type a 
+               , tiOperator :: Name a
+               , tiRight :: Type a
+               , typeInfo :: a
+               } -- ^ infix type constructor (@ (a <: b) @)
+  | TyKinded   { tkType :: Type a
+               , tkKind :: Kind a
+               , typeInfo :: a
+               } -- ^ type with explicit kind signature (@ a :: * @)
+  | TyPromoted { tpPromoted :: Promoted a
+               , typeInfo :: a
+               } -- a promoted data type with -XDataKinds (@ '3 @).
+  | TySplice   { tsSplice :: Splice a
+               , typeInfo :: a
+               } -- ^ a Template Haskell splice type (@ $(genType) @).
+  | TyBang     { typeInner :: Type a
+               , typeInfo :: a
+               } -- ^ Strict type marked with "!".
+  | TyUnpack   { typeInner :: Type a
+               , typeInfo :: a
+               } -- ^ Type marked with UNPACK pragma.
+
+data Kind a
+  = KindStar { kindInfo :: a } -- ^ *, the kind of types
+  | KindBang { kindInfo :: a } -- ^ !, the kind of unboxed types
+  | KindFn { kindLeft :: Kind a
+           , kindRight :: Kind a
+           , kindInfo :: a
+           } -- ^ ->, the kind of type constructor
+  | KindParen { kindParen :: Kind a
+              , kindInfo :: a 
+              } -- ^ a parenthesised kind
+  | KindVar { kindVar :: Name a
+            , kindInfo :: a 
+            } -- ^ kind variable (using PolyKinds extension)
+  | KindApp { kindAppFun :: Kind a
+            , kindAppArg :: Kind a 
+            , kindInfo :: a 
+            } -- ^ kind application (@ k1 k2 @)
+  | KindTuple { kindTuple :: ASTList Kind a
+              , kindInfo :: a 
+              } -- ^ a promoted tuple (@ '(k1,k2,k3) @)
+  | KindList { kindList :: ASTList Kind a
+             , kindInfo :: a 
+             } -- ^ a promoted list literal (@ '[k1,k2,k3] @)
+  
+data Context a
+  = ContextOne { contextAssertion :: Assertion a
+               , contextInfo :: a
+               } -- ^ one assertion (@ C a => ... @)
+  | ContextMulti { contextAssertions :: ASTList Assertion a
+                 , contextInfo :: a
+                 } -- ^ a set of assertions (@ (C1 a, C2 b) => ... @, but can be one: @ (C a) => ... @)
+
+data Assertion a
+  = ClassAssert     { assertClsName :: Name a
+                    , assertTypes :: ASTList Type a
+                    , assertInfo :: a
+                    }
+  | AppAssert       { assertConstrName :: Name a
+                    , assertTypes :: ASTList Type a
+                    , assertInfo :: a
+                    }
+  | InfixAssert     { assertLhs :: Type a
+                    , assertOp :: Name a
+                    , assertRhs :: Type a
+                    , assertInfo :: a
+                    }
+  | ImplParamAssert { assertParam :: ImplicitName a
+                    , assertType :: Type a
+                    , assertInfo :: a
+                    }
+  | EqualAssert     { assertLhs :: Type a
+                    , assertRhs :: Type a
+                    , assertInfo :: a
+                    }
+  | ParenAssert     { assertInner :: Assertion a
+                    , assertInfo :: a
+                    }
+  | WildcardAssert  { assertWildcardName :: ASTMaybe Name a
+                    , assertInfo :: a
+                    }
+                 
+-- | Haskell expressions
+data Expr a
+  = Var               { exprName :: Name a
+                      , exprInfo :: a
+                      } -- ^ a variable (@ a @)
+  | ImplicitVar       { exprImplName :: ImplicitName a
+                      , exprInfo :: a
+                      } -- ^ an implicit parameter (@ ?a @)
+  | Con               { exprName :: Name a
+                      , exprInfo :: a
+                      } -- ^ data constructor (@Point@ in @Point 1 2@)
+  | Lit               { exprLit :: Literal a
+                      , exprInfo :: a
+                      } -- ^ primitive literal
+  | InfixApp          { exprLhs :: Expr a
+                      , exprOperator :: Name a
+                      , exprRhs :: Expr a
+                      , exprInfo :: a
+                      } -- ^ Infix operator application (@ a + b @)
+  | App               { exprFun :: Expr a
+                      , exprArg :: Expr a
+                      , exprInfo :: a
+                      } -- ^ Function application (@ f 4 @)
+  -- unary minus omitted
+  | Lambda            { exprBindings :: ASTList Pattern a -- ^ at least one
+                      , exprInner :: Expr a
+                      , exprInfo :: a
+                      } -- ^ lambda expression (@ \a b -> a + b @)
+  | Let               { exprFunBind :: ASTList FunBind a
+                      , exprInner :: Expr a
+                      , exprInfo :: a
+                      }
+  | If                { exprCond :: Expr a
+                      , exprThen :: Expr a
+                      , exprElse :: Expr a
+                      , exprInfo :: a
+                      }
+  | MultiIf           { exprIfAlts :: ASTList GuardedRhs a
+                      , exprInfo :: a
+                      }
+  | Case              { exprCase :: Expr a
+                      , exprAlts :: ASTList Alt a
+                      , exprInfo :: a
+                      }
+  | Do                { doKind :: DoKind a
+                      , exprStmts :: ASTList Stmt a
+                      , exprInfo :: a
+                      }
+  | Tuple             { tupleElems :: ASTList Expr a
+                      , exprInfo :: a
+                      }
+  | UnboxedTuple      { tupleElems :: ASTList Expr a
+                      , exprInfo :: a
+                      }
+  | TupleSection      { tupleSectionElems :: ASTList (ASTMaybe Expr) a
+                      , exprInfo :: a
+                      }
+  | BoxedTupleSection { tupleSectionElems :: ASTList (ASTMaybe Expr) a
+                      , exprInfo :: a
+                      }
+  | List              { listElems :: ASTList Expr a
+                      , exprInfo :: a
+                      } -- ^ List expression: @[1,2,3]@
+  | ParArray          { listElems :: ASTList Expr a
+                      , exprInfo :: a
+                      } -- ^ Parallel array expression: @[: 1,2,3 :]@
+  | Paren             { exprInner :: Expr a
+                      , exprInfo :: a
+                      }
+  | LeftSection       { exprLhs :: Expr a
+                      , exprOperator :: Name a
+                      , exprInfo :: a
+                      } -- ^ Left operator section: @(1+)@
+  | RightSection      { exprOperator :: Name a
+                      , exprRhs :: Expr a
+                      , exprInfo :: a
+                      } -- ^ Right operator section: @(+1)@
+  | RecCtorExpr       { exprRecName :: Name a
+                      , exprRecFields :: ASTList FieldUpdate a
+                      , exprInfo :: a
+                      } -- ^ Record value construction: @Point { x = 3, y = -2 }@
+  | RecUpdateExpr     { exprToUpdate :: Expr a
+                      , exprRecFields :: ASTList FieldUpdate a
+                      , exprInfo :: a
+                      } -- ^ Record value update: @p1 { x = 3, y = -2 }@
+  | Enum              { enumFrom :: Expr a
+                      , enumThen :: ASTMaybe Expr a
+                      , enumTo :: ASTMaybe Expr a
+                      , exprInfo :: a
+                      }
+  | ParArrayEnum      { parEnumFrom :: Expr a
+                      , parEnumThen :: ASTMaybe Expr a
+                      , parEnumTo :: Expr a
+                      , exprInfo :: a
+                      }
+  | ListComp          { compExpr :: Expr a
+                      , compBody :: ASTList CompStmt a
+                      } -- ^ List comprehension  
+  | ParListComp       { compExpr :: Expr a
+                      , parCompBody :: ASTList (ASTList CompStmt) a
+                      } -- ^ Parallel list comprehension: @ [ (x, y) | x <- xs | y <- ys ] @
+  | ParArrayComp      { compExpr :: Expr a
+                      , parCompBody :: ASTList (ASTList CompStmt) a
+                      } -- ^ List comprehension  
+  | TypeSig           { exprInner :: Expr a
+                      , exprSig :: Type a
+                      , exprInfo :: a
+                      }
+  -- Template Haskell
+  | VarQuote          { quotedName :: Name a
+                      , exprInfo :: a
+                      } -- ^ @'x@ for template haskell reifying of expressions
+  | TypeQuote         { quotedName :: Name a
+                      , exprInfo :: a
+                      } -- ^ @''T@ for template haskell reifying of types
+  | BracketExpr       { bracket :: Bracket a
+                      , exprInfo :: a
+                      } -- ^ template haskell bracket expression, for example: @[| x |]@
+  | Splice            { innerExpr :: Expr a
+                      , exprInfo :: a
+                      } -- ^ template haskell splice expression, for example: @$(gen a)@ or @$x@
+  | QuasiQuote        { qqExprName :: Name a
+                      , qqExprBody :: QQString a
+                      , exprInfo :: a
+                      } -- ^ template haskell quasi-quotation: @[$quoter|str]@
+  -- | ExprPragma        { exprPragma :: ExprPragma a 
+                      -- , exprInfo :: a
+                      -- }
+  -- Arrows
+  | Proc              { procPattern :: Pattern a
+                      , procExpr :: Expr a
+                      , exprInfo :: a
+                      }
+  | ArrowApp          { exprLhs :: Expr a
+                      , arrowAppl :: ArrowAppl a
+                      , exprRhs :: Expr a
+                      }
+  | LamCase           { exprAlts :: ASTList Alt a
+                      , exprInfo :: a
+                      } -- ^ lambda case: @\case 0 -> 1; 1 -> 2@
+  -- XML expressions omitted
+          
+data Stmt a
+  = BindStmt { stmtPattern :: Pattern a
+             , stmtExpr :: Expr a
+             , stmtInfo :: a
+             }
+  | ExprStmt { stmtExpr :: Expr a
+             , stmtInfo :: a
+             }
+  | LetStmt  { stmtBinds :: Binds a
+             , stmtInfo :: a
+             }
+  | RecStmt  { stmtRecBinds :: ASTList Stmt a
+             , stmtInfo :: a
+             } -- ^ a recursive binding group for arrows
+          
+data CompStmt a
+  = CompStmt   { compStmt :: Stmt a 
+               , compInfo :: a
+               }
+  | ThenStmt   { thenExpr :: Expr a 
+               , byExpr :: ASTMaybe Expr a
+               , compInfo :: a
+               }
+  | GroupStmt  { byExpr :: ASTMaybe Expr a
+               , usingExpr :: ASTMaybe Expr a
+               , compInfo :: a
+               } -- ^ byExpr or usingExpr must have a value
+          
+          
 -- | Function binding
 data FunBind a
   = FunBind { funBindMatches :: ASTList Match a 
             , funBindInfo :: a
             }            
-  
--- | Haskell expressions
-data Expr a
-  = Var { exprName :: Name a
-        , exprInfo :: a
-        } -- ^ a variable (@ a @)
-  | ImplicitVar { exprName :: ImplicitName a
-                , exprInfo :: a
-                } -- ^ an implicit parameter (@ ?a @)
-  | Con { exprName :: Name a
-        , exprInfo :: a
-        } -- ^ data constructor (@Point@ in @Point 1 2@)
-  | Lit { exprLit :: Literal a
-        , exprInfo :: a
-        } -- ^ primitive literal
-  | InfixApp { exprLhs :: Expr a
-             , exprOperator :: Name a
-             , exprRhs :: Expr a
-             , exprInfo :: a
-             } -- ^ Infix operator application (@ a + b @)
-  | App { exprFun :: Expr a
-        , exprArg :: Expr a
-        , exprInfo :: a
-        } -- ^ Function application (@ f 4 @)
-  -- unary minus omitted
-  | Lambda { exprBindings :: ASTList Pattern a -- ^ at least one
-           , exprInner :: Expr a
-           , exprInfo :: a
-           } -- ^ lambda expression (@ \a b -> a + b @)
-  | Let { exprFunBind :: ASTList FunBind a
-        , exprInner :: Expr a
-        , exprInfo :: a
-        }
-  | If { exprCond :: Expr a
-       , exprThen :: Expr a
-       , exprElse :: Expr a
-       , exprInfo :: a
-       }
-  | MultiIf { exprIfAlts :: ASTList GuardedLhs a
-            , exprInfo :: a
-            }
-  | Case { exprCase :: Expr a
-         , exprAlts :: ASTList Alt a
-         , exprInfo :: a
-         }
-  | Do { doKind :: DoKind a
-       , exprStmts :: ASTList Stmt a
-       , exprInfo :: a
-       }
-  | Tuple { tupleElems :: ASTList Expr a
-          , exprInfo :: a
-          }
-  | UnboxedTuple { tupleElems :: ASTList Expr a
-                 , exprInfo :: a
-                 }
-  | TupleSection { boxed :: Boxed a
-                 , tupleElems :: ASTList (ASTMaybe Expr) a
-                 , exprInfo :: a
-                 }
-  | List { listElems :: ASTList Expr a
-         , exprInfo :: a
-         } -- ^ List expression: @[1,2,3]@
-  | ParArray { listElems :: ASTList Expr a
-             , exprInfo :: a
-             } -- ^ Parallel array expression: @[: 1,2,3 :]@
-  | Paren { exprInner :: Expr a
-          , exprInfo :: a
-          }
-  | LeftSection { exprLhs :: Expr a
-                , exprOperator :: Name a
-                , exprInfo :: a
-                } -- ^ Left operator section: @(1+)@
-  | RightSection { exprOperator :: Name a
-                 , exprRhs :: Expr a
-                 , exprInfo :: a
-                 } -- ^ Right operator section: @(+1)@
-  | RecCtorExpr { exprRecName :: Name a
-                , exprRecFields :: ASTList FieldUpdate a
-                , exprInfo :: a
-                } -- ^ Record value construction: @Point { x = 3, y = -2 }@
-  | RecUpdateExpr { exprRecName :: Expr a
-                  , exprRecFields :: ASTList FieldUpdate a
-                  , exprInfo :: a
-                  } -- ^ Record value update: @p1 { x = 3, y = -2 }@
-  | Enum { enumFrom :: Expr a
-         , enumThen :: ASTMaybe Expr a
-         , enumTo :: ASTMaybe Expr a
-         , exprInfo :: a
-         }
-  | ParArrayEnum { enumFrom :: Expr a
-                 , enumThen :: ASTMaybe Expr a
-                 , enumTo :: Expr a
-                 , exprInfo :: a
-                 }
-  | ListComp { compExpr :: Expr a
-             , compBody :: ASTList CompStmt a
-             } -- ^ List comprehension  
-  | ParListComp { compExpr :: Expr a
-                , parCompBody :: ASTList (ASTList CompStmt) a
-                } -- ^ Parallel list comprehension: @ [ (x, y) | x <- xs | y <- ys ] @
-  | ParArrayComp { compExpr :: Expr a
-                 , parCompBody :: ASTList (ASTList CompStmt) a
-                 } -- ^ List comprehension  
-  | TypeSig { exprInner :: Expr a
-            , exprSig :: Type a
-            , exprInfo :: a
-            }
-  -- Template Haskell
-  | VarQuote { quotedName :: Name a
-             , exprInfo :: a
-             } -- ^ @'x@ for template haskell reifying of expressions
-  | TypeQuote { quotedName :: Name a
-              , exprInfo :: a
-              } -- ^ @''T@ for template haskell reifying of types
-  | BracketExpr { bracketType :: Bracket a
-                , innerExpr :: Expr a
-                , exprInfo :: a
-                } -- ^ template haskell bracket expression, for example: @[| x |]@
-  | Splice { innerExpr :: Expr a
-           , exprInfo :: a
-           } -- ^ template haskell splice expression, for example: @$(gen a)@ or @$x@
-  | QuasiQuote { qqExprName :: Name a
-               , qqExprBody :: QQString a
-               , exprInfo :: a
-               } -- ^ template haskell quasi-quotation: @[$quoter|str]@
-  | ExprPragma { exprPragma :: ExprPragma a }
-  -- Arrows
-  | Proc { procPattern :: Pattern a
-         , procExpr :: Expr a
-         , exprInfo :: a
-         }
-  | ArrowApp { exprLhs :: Expr a
-             , arrowAppl :: ArrowAppl
-             , exprRhs :: Expr a
-             }
-  | LamCase { exprAlts :: ASTList Alt a
-            , exprInfo :: a
-            } -- ^ lambda case: @\case 0 -> 1; 1 -> 2@
-  -- XML expressions omitted
-             
+          
 data Pattern a
   = VarPat { patternName :: Name a
            , patternInfo :: a
@@ -559,4 +658,98 @@ data Pattern a
                   , qqPatternBody :: QQString a
                   , patternInfo :: a
                   }
+                  
+data PatternField a 
+  = NormalFieldPattern   { fieldPatternName :: Name a
+                         , fieldPattern :: Pattern a
+                         , fieldPatternInfo :: a
+                         }
+  | FieldPunPattern      { fieldPatternName :: Name a
+                         , fieldPatternInfo :: a
+                         }
+  | FieldWildcardPattern { fieldPatternInfo :: a }
+                       
+                  
+data Splice a
+  = IdSplice { spliceId :: Name a
+             , spliceInfo :: a 
+             }
+  | ParenSplice { spliceExpr :: Expr a
+                , spliceInfo :: a
+                }
+               
+data QQString a
+  = QQString { qqString :: String
+             , qqInfo :: a
+             }
+              
+data Binds a
+  = DeclBindings     { bindingDecls :: ASTList Decl a
+                     , bindingInfo :: a
+                     }
+  | ImplicitBindings { bindingImplDecls :: ASTList ImplBind a
+                     , bindingInfo :: a
+                     }
+                     
+data ImplBind a
+  = ImplBind { implBindName :: ImplicitName a
+             , implBindExpr :: Expr a
+             , implBindInfo :: a
+             }
+   
+-- | Clause of function binding   
+data Match a
+  = Match { matchName :: Name a
+          , matchArgs :: ASTList Pattern a
+          , matchType :: ASTMaybe Type a
+          , matchRhs :: Rhs a
+          , matchBinds :: ASTMaybe Binds a
+          , matchInfo :: a
+          }
+    
+-- | Clause of case expression          
+data Alt a
+  = Alt { altPattern :: Pattern a
+        , altRhs :: Rhs a
+        , altBinds :: ASTMaybe Binds a
+        , altInfo :: a
+        }
+        
+data Rhs a
+  = UnguardedRhs { rhsExpr :: Expr a
+                 , rhsInfo :: a
+                 }
+  | GuardedRhss  { rhsGuards :: ASTList GuardedRhs a
+                 , rhsInfo :: a
+                 }
+               
+data GuardedRhs a
+  = GuardedRhs { guardStmts :: ASTList Stmt a
+               , guardExpr :: Expr a
+               , guardInfo :: a
+               }
+               
+data FieldUpdate a 
+  = NormalFieldUpdate { fieldName :: Name a
+                      , fieldValue :: Expr a
+                      , fieldUpdateInfo :: a
+                      }
+  | FieldPun          { fieldName :: Name a
+                      , fieldUpdateInfo :: a
+                      }
+  | FieldWildcard     { fieldUpdateInfo :: a }
+               
+data Bracket a
+  = ExprBracket    { bracketExpr :: Expr a
+                   , bracketInfo :: a 
+                   }
+  | PatternBracket { bracketPattern :: Pattern a
+                   , bracketInfo :: a 
+                   }
+  | TypeBracket    { bracketType :: Type a
+                   , bracketInfo :: a
+                   }
+  | DeclBracket    { bracketDecl :: Decl a
+                   , bracketInfo :: a
+                   }
                   
