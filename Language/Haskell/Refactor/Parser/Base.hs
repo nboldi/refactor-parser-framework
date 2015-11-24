@@ -19,8 +19,8 @@ import Data.Char
 import Language.Haskell.Refactor.AST.Base
 
 
-type BI = NodeInfo BasicInfo ()
-type NI = NodeInfo TemplateInfo ()
+type BI = TI.BI ()
+type NI = TI.NI ()
 
 type HaskellParser a = ParsecT String () Identity a
 
