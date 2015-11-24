@@ -14,6 +14,7 @@ import MiniC.AST
 import SourceCode.ASTNode
 import SourceCode.ASTElems
 import SourceCode.SourceTree
+import SourceCode.Semantics
 import SourceCode.SourceInfo
 import SourceCode.SourceNotation
 import SourceCode.InfoTypes

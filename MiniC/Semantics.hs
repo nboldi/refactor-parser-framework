@@ -15,6 +15,7 @@ import Data.Function
 import Data.Maybe
 import Data.Typeable
 import SourceCode.SourceInfo
+import SourceCode.Semantics
 import SourceCode.ToSourceTree
 import SourceCode.InfoTypes
 import SourceCode.PrettyPrint
@@ -79,12 +80,6 @@ outerScope qn
       
 $(makeLenses ''SemaInfo)   
   
-instance SourceInfo srci => SourceInfo (NodeInfo srci SemaInfo) where
-  generateInfo anc children 
-    = NodeInfo (generateInfo (anc ^. sourceInfo) (children ^.. each.sourceInfo)) emptySemaInfo
-  noNodeInfo = NodeInfo noNodeInfo emptySemaInfo
-  
-emptySemaInfo :: SemaInfo
-emptySemaInfo 
-  = SemaInfo Nothing Nothing Nothing
+instance SemanticInfo SemaInfo where 
+  emptySemaInfo = SemaInfo Nothing Nothing Nothing
   
