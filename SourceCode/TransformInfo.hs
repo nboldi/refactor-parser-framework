@@ -1,10 +1,9 @@
 {-# LANGUAGE LambdaCase, ScopedTypeVariables, FlexibleContexts, MultiParamTypeClasses #-}
 
 -- | The purpose of this module is to transform an AST with basic infos to an AST with templates.
-module MiniC.TransformInfo where
+module SourceCode.TransformInfo (transformSourceInfo) where
 
-import MiniC.Representation
-import MiniC.Semantics
+import SourceCode.Semantics
 import Control.Lens
 import Control.Monad.State
 import Control.Monad.Reader
@@ -18,16 +17,19 @@ import SourceCode.ToSourceTree
 import SourceCode.InfoTypes
 import Debug.Trace
 
+type BI sema = NodeInfo BasicInfo sema
+type NI sema = NodeInfo TemplateInfo sema
+        
         
 -- | Creates source templates from simple source strings
-transformSourceInfo :: (SmartTrav node, ToSourceRose node BI)
-                    => node BI -> node NI
+transformSourceInfo :: (SemanticInfo sema, SmartTrav node, ToSourceRose node (BI sema))
+                    => node (BI sema) -> node (NI sema)
 transformSourceInfo = cutOutTemplates . expandNodes
 
 -- | Expands nodes to contain all their children
-expandNodes :: SmartTrav node => node BI -> node BI
+expandNodes :: forall node sema . SmartTrav node => node (BI sema) -> node (BI sema)
 expandNodes n = evalState (expandNodes' n) [Nothing]
-  where expandNodes' :: SmartTrav node => node BI -> State [Maybe BI] (node BI)
+  where expandNodes' :: SmartTrav node => node (BI sema) -> State [Maybe (BI sema)] (node (BI sema))
         expandNodes' = smartTrav desc asc f
         
         desc = modify (Nothing:)
@@ -41,17 +43,19 @@ expandNodes n = evalState (expandNodes' n) [Nothing]
 
 -- | Replaces assigned input of nodes with source templates.
 -- Goes top-down and replaces the info in every node according to structure of the whole tree.
-cutOutTemplates :: forall node . (SmartTrav node, ToSourceRose node BI) 
-                => node BI -> node NI
+cutOutTemplates :: forall node sema . (SemanticInfo sema, SmartTrav node, ToSourceRose node (BI sema)) 
+                => node (BI sema) -> node (NI sema)
 cutOutTemplates ast 
   = let rose = fmap (view sourceInfo) (toRose ast)
      in evalState (runReaderT (cutOutTemplates' ast)
                               (rose, generateRangeTree Root rose))
                   (Root,0)                 
 
-  where cutOutTemplates' :: node BI -> ReaderT (SourceRose BasicInfo, [RangeTree]) 
+  where cutOutTemplates' 
+          :: node (BI sema) 
+          -> ReaderT (SourceRose BasicInfo, [RangeTree]) 
                                                       (State (RootIndex, Int)) 
-                                                      (node NI)
+                                                      (node (NI sema))
         cutOutTemplates' 
           = do smartTrav ( lift $ modify (\(ri, i) -> (RootIndex i ri, 0)) )
                          ( lift $ modify (\(RootIndex i ri, _) -> (ri, i+1)) )

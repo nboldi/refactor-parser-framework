@@ -11,10 +11,10 @@ import MiniC.GenTemplate
 import MiniC.Semantics
 import MiniC.Helpers
 import MiniC.SymbolTable
-import MiniC.TransformInfo
 import MiniC.Instances
 
 import SourceCode.ASTElems
+import SourceCode.TransformInfo
 import SourceCode.ToSourceTree
 import SourceCode.ASTNode
 import SourceCode.RangeTree

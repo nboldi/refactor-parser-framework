@@ -4,13 +4,14 @@ import SourceCode.ASTElems
 
 data QName a = QName { qualifiers :: ASTList Name a
                      , unqualifiedName :: Name a 
+                     , qnameInfo :: a
                      }
   
 -- | Contains also implicit names.
 -- Linear implicit parameter: @%x@. Non-linear implicit parameter: @?x@.
 data Name a = Name { nameStr :: String
                    , nameInfo :: a
-                   }    
+                   } deriving Show
 data DataOrNewKeyword a
   = DataKeyword { dataKeywordInfo :: a }
   | NewdataKeyword { dataKeywordInfo :: a }

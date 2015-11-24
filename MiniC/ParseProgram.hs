@@ -8,7 +8,7 @@ import MiniC.MiniCPP (cPreproc)
 import MiniC.Parser.Lexical (whole)
 import MiniC.SymbolTable (initUserState)
 import MiniC.Semantics
-import MiniC.TransformInfo
+import SourceCode.TransformInfo
 import Text.Preprocess.Parser
 import Text.Preprocess.Rewrites
 

@@ -11,6 +11,7 @@ import Data.Maybe
 import Control.Lens
 import Debug.Trace
 
+import SourceCode.Semantics
 import SourceCode.SourceNotation
 import SourceCode.SourceTree
 import SourceCode.ASTElems

@@ -14,8 +14,8 @@ import MiniC.SymbolTable
 import MiniC.Representation
 import MiniC.Helpers
 import MiniC.Instances
-import MiniC.TransformInfo
 import Text.Preprocess.Parser
+import SourceCode.TransformInfo
 import SourceCode.SourceNotation
 import SourceCode.ToSourceTree (ToSourceRose)
 import SourceCode.SourceInfo (noNodeInfo)
