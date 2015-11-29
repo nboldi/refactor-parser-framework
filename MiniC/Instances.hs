@@ -260,11 +260,22 @@ deriveSmartTrav ''Variant
 
 -- * Instances for generic AST elements
 
+type ASTListElemsBI e = ASTListElems e BI
+type ASTListElemsNI e = ASTListElems e NI
+instance (Show a, ToSourceRose e a, Generic (e a)) => ToSourceRose (ASTListElems e) a
+instance (ASTNode e a, Generic (e a)) => ASTNode (ASTListElems e) a
+deriveSmartTrav ''ASTListElems
+  
+
 type ASTListBI e = ASTList e BI
 type ASTListNI e = ASTList e NI
 instance (Show a, ToSourceRose e a, Generic (e a)) => ToSourceRose (ASTList e) a
 instance (ASTNode e a, Generic (e a)) => ASTNode (ASTList e) a
-deriveSmartTrav ''ASTList
+
+-- TODO: correct automatic generation (the predicate `SmartTrav e` is not synthesized)
+-- deriveSmartTrav ''ASTList
+instance SmartTrav e => SmartTrav (ASTList e) where
+  smartTrav desc asc f (ASTList ls i) = ASTList <$> (desc *> smartTrav desc asc f ls <* asc) <*> f i
   
 type ASTWrapperBI e = ASTWrapper e BI
 type ASTWrappereNI e = ASTWrapper e NI

@@ -26,6 +26,21 @@ instance Eq (NodeInfo source sema) where
 instance Ord (NodeInfo source sema) where
   _ `compare` _ = EQ
     
+    
+data RangeInfo
+  = RangeInfo { _riRange :: SourceRange }
+  | NoRangeInfo
+  deriving (Show, Eq, Ord, Typeable, Data)
+  
+$(makeLenses ''RangeInfo)
+
+instance SourceInfo RangeInfo where
+  generateInfo ancestor []
+    = ancestor & riRange %~ rngStartAsRange
+  generateInfo _ children
+    = foldl1 (\(RangeInfo r1) (RangeInfo r2) -> RangeInfo (r1 `srcRngUnion` r2)) children
+  noNodeInfo = NoRangeInfo
+    
 -- | An intermediate node information that contains the source range 
 -- of the node and the remaining input of the parser when it started 
 -- parsing the element. We could only store the text from which the node

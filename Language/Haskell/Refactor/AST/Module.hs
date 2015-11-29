@@ -5,54 +5,56 @@ import Language.Haskell.Refactor.AST.Base
 import Language.Haskell.Refactor.AST.Decl
 
 data Module a 
-  = Module { modHead :: ASTMaybe ModuleHead a
+  = Module { modHead    :: ASTMaybe ModuleHead a
            , modPragmas :: ASTList ModulePragma a
            , modImports :: ASTList ImportDecl a
-           , modDecl :: ASTList Decl a
-           , modInfo :: a 
-           }
+           , modDecl    :: ASTList Decl a
+           , modInfo    :: a 
+           } deriving Show
 
 data ModuleHead a
-  = ModuleHead { mhName :: Name a
+  = ModuleHead { mhName    :: Name a
                , mhExports :: ASTMaybe ExportSpecList a
-               , mhInfo :: a
-               }
+               , mhInfo    :: a
+               } deriving Show
 
 data ExportSpecList a
   = ExportSpecList { espExports :: ASTList ExportSpec a 
-                   , espInfo :: a
-                   }
+                   , espInfo    :: a
+                   } deriving Show
   
 data ExportSpec a
   = ExportVar { evNamespace :: ASTMaybe TypeNamespace a
-              , evName :: QName a
-              , evInfo :: a
+              , evName      :: Name a
+              , evInfo      :: a
               }
-  | ExportAbstract { eAbsName :: QName a
+  | ExportAbstract { eAbsName :: Name a
                    , eAbsInfo :: a
                    }
-  | ExportAll { eAllName :: QName a
+  | ExportAll { eAllName :: Name a
               , eAllInfo :: a
               }
-  | ExportWith { eWithName :: QName a
+  | ExportWith { eWithName  :: Name a
                , eWithDecls :: ASTList Name a
-               , eWithInfo :: a
+               , eWithInfo  :: a
                }
   | ExportModule { eModName :: Name a
                  , eModInfo :: a 
                  }
+  deriving Show
                  
 data ModulePragma a
   = LanguagePragma { lpPragmas :: ASTList Name a
-                   , lpInfo :: a 
+                   , lpInfo    :: a 
                    }  -- ^ LANGUAGE pragma
-  | OptionsPragma  { opTool :: ASTMaybe Name a
-                   , opStr :: String
-                   , opInfo :: a 
+  | OptionsPragma  { opTool    :: ASTMaybe Name a
+                   , opStr     :: String
+                   , opInfo    :: a 
                    } -- ^ OPTIONS pragma, possibly qualified with a tool, e.g. OPTIONS_GHC
-  | AnnModulePragma { ampExpr :: Expr a
-                    , ampInfo :: a
+  | AnnModulePragma { ampExpr  :: Expr a
+                    , ampInfo  :: a
                     } -- ^ ANN pragma with module scope
+  deriving Show
                       
 data ImportDecl a
   = ImportDecl { importModule       :: Name a
@@ -63,13 +65,14 @@ data ImportDecl a
                , importAs           :: ASTMaybe ImportRenaming a
                , importInfo         :: a
                } -- ^ An import declaration
+  deriving Show
                
-data ImportQualified a  = ImportQualified   { importQualifiedInfo :: a }
-data ImportSource a     = ImportSource      { importSourceInfo :: a }
-data ImportSafe a       = ImportSafe        { importSafeInfo :: a }
-data TypeNamespace a    = TypeNamespace     { typeNamespaceInfo :: a }
+data ImportQualified a  = ImportQualified   { importQualifiedInfo :: a } deriving Show
+data ImportSource a     = ImportSource      { importSourceInfo :: a } deriving Show
+data ImportSafe a       = ImportSafe        { importSafeInfo :: a } deriving Show
+data TypeNamespace a    = TypeNamespace     { typeNamespaceInfo :: a } deriving Show
 
 data ImportRenaming a = ImportRenaming { importRenamingName :: Name a
                                        , importRenamingInfo :: a 
-                                       }
+                                       } deriving Show
                

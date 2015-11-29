@@ -98,13 +98,14 @@ data Decl a
                   , declInfo :: a
                   } -- ^ foreign export (@ foreign export ccall foo :: Int -> IO Int @)
   -- | Pragma { tlPragma :: TopLevelPragma a } -- ^ top level pragmas
+  deriving Show
        
    
 -- | The list of declarations that can appear in a typeclass
 data ClassBody a
   = ClassBody { cbElements :: ASTList ClassElement a
               , cbInfo :: a
-              }
+              } deriving Show
               
 data ClassElement a
   = ClsDecl { cleDecl :: Decl a
@@ -127,6 +128,7 @@ data ClassElement a
               , cldType :: Type a
               , cleInfo :: a
               } -- ^ default signature (by using DefaultSignatures): @ default enum :: (Generic a, GEnum (Rep a)) => [a] @
+  deriving Show
        
 data DeclHead a
   = DeclHead { dhName :: Name a 
@@ -143,17 +145,19 @@ data DeclHead a
              , dhInfixLeft :: TyVar a
              , dhInfo :: a
              } -- ^ infix application of the type/class name to the left operand
+ deriving Show
        
 -- | Recognised overlaps for overlap pragmas.       
 data OverlapPragma a
   = EnableOverlap { overlapInfo :: a } -- ^ NO_OVERLAP pragma
   | DisableOverlap { overlapInfo :: a } -- ^ OVERLAP pragma
   | IncoherentOverlap { overlapInfo :: a } -- ^ INCOHERENT pragma
+  deriving Show
 
 data InstBody a
   = InstBody { instBodyDecls :: ASTList InstBodyDecl a
              , instBodyInfo :: a
-             }
+             } deriving Show
 
 -- | Declarations inside an instance declaration.
 data InstBodyDecl a
@@ -177,7 +181,7 @@ data InstBodyDecl a
                          , instBodyDerivings :: ASTMaybe Deriving a
                          , instBodyDeclInfo :: a
                          } -- ^ an associated data type implemented using GADT style
-                         
+  deriving Show
   
 
 data GadtDecl a
@@ -185,21 +189,20 @@ data GadtDecl a
              , gdFields :: ASTMaybe (ASTList FieldDecl) a
              , gdType :: Type a
              , gdInfo :: a
-             }
+             } deriving Show
          
 -- | A list of functional dependencies: @ ... | a -> b, c -> d @         
 data FunDeps a
   = FunDeps { funDeps :: ASTList FunDep a
             , funDepsInfo :: a
-            }
+            } deriving Show
          
 -- | A functional dependency, given on the form @l1 ... ln -> r1 ... rn@         
 data FunDep a
   = FunDep { funDepLhs :: ASTList Name a
            , funDepRhs :: ASTList Name a
            , funDepInfo :: a
-           }
-           
+           } deriving Show
   
 data ConDecl a
   = ConDecl { conDeclName :: Name a
@@ -215,12 +218,13 @@ data ConDecl a
                  , icdRhs :: Type a
                  , icdInfo :: a
                  } -- ^ infix data constructor (@ t1 :+: t2 @)
+  deriving Show
   
 data FieldDecl a
   = FieldDecl { fieldNames :: ASTList Name a
               , fieldType :: Type a
               , fieldInfo :: a
-              }
+              } deriving Show
   
 -- | A deriving clause following a data type declaration. (@ deriving Show @ or @ deriving (Show, Eq) @)
 data Deriving a
@@ -230,6 +234,7 @@ data Deriving a
   | Derivings   { allDerived :: ASTList InstanceRule a
                 , derivingInfo :: a
                 }
+  deriving Show
   
 -- | The instance declaration rule, which is, roughly, the part of the instance declaration before the where keyword.
 data InstanceRule a
@@ -241,6 +246,7 @@ data InstanceRule a
   | InstanceParen { irRule :: InstanceRule a
                   , irInfo :: a
                   }
+  deriving Show
 
 data InstanceHead a
   = InstanceHeadCon { ihConName :: Name a
@@ -257,12 +263,14 @@ data InstanceHead a
                     , ihType :: Type a
                     , ihInfo :: a
                     } -- ^ application to one more type
+  deriving Show
         
 data TypeEqn a
   = TypeEqn { teLhs :: Type a
             , teRhs :: Type a
             , teInfo :: a
             } -- ^ type equations as found in closed type families (@ T A = S @)
+  deriving Show
    
 -- data TopLevelPragma a
   -- = RulePragma    { pragmaRule :: ASTList Rule a
@@ -303,7 +311,7 @@ data TyVar a
   = TyVarDecl { tyVarName :: Name a
               , tyVarKind :: ASTMaybe Kind a
               , tyVarInfo :: a
-              }
+              } deriving Show
            
 data Type a
   = TyForall   { tfaBounded :: ASTMaybe TyVar a
@@ -362,6 +370,7 @@ data Type a
   | TyUnpack   { typeInner :: Type a
                , typeInfo :: a
                } -- ^ Type marked with UNPACK pragma.
+  deriving Show
 
 data Kind a
   = KindStar { kindInfo :: a } -- ^ *, the kind of types
@@ -386,6 +395,7 @@ data Kind a
   | KindList { kindList :: ASTList Kind a
              , kindInfo :: a 
              } -- ^ a promoted list literal (@ '[k1,k2,k3] @)
+  deriving Show
   
 data Context a
   = ContextOne { contextAssertion :: Assertion a
@@ -394,6 +404,7 @@ data Context a
   | ContextMulti { contextAssertions :: ASTList Assertion a
                  , contextInfo :: a
                  } -- ^ a set of assertions (@ (C1 a, C2 b) => ... @, but can be one: @ (C a) => ... @)
+  deriving Show
 
 data Assertion a
   = ClassAssert     { assertClsName :: Name a
@@ -419,6 +430,7 @@ data Assertion a
   | WildcardAssert  { assertWildcardName :: ASTMaybe Name a
                     , assertInfo :: a
                     }
+  deriving Show
                  
 -- | Haskell expressions
 data Expr a
@@ -558,6 +570,7 @@ data Expr a
                       , exprInfo :: a
                       } -- ^ lambda case: @\case 0 -> 1; 1 -> 2@
   -- XML expressions omitted
+  deriving Show
           
 data Stmt a
   = BindStmt { stmtPattern :: Pattern a
@@ -573,6 +586,7 @@ data Stmt a
   | RecStmt  { stmtRecBinds :: ASTList Stmt a
              , stmtInfo :: a
              } -- ^ a recursive binding group for arrows
+  deriving Show
           
 data CompStmt a
   = CompStmt   { compStmt :: Stmt a 
@@ -586,13 +600,14 @@ data CompStmt a
                , usingExpr :: ASTMaybe Expr a
                , compInfo :: a
                } -- ^ byExpr or usingExpr must have a value
-          
+  deriving Show
           
 -- | Function binding
 data FunBind a
   = FunBind { funBindMatches :: ASTList Match a 
             , funBindInfo :: a
-            }            
+            }        
+  deriving Show            
           
 data Pattern a
   = VarPat { patternName :: Name a
@@ -651,6 +666,7 @@ data Pattern a
                   , qqPatternBody :: QQString a
                   , patternInfo :: a
                   }
+  deriving Show
                   
 data PatternField a 
   = NormalFieldPattern   { fieldPatternName :: Name a
@@ -661,8 +677,8 @@ data PatternField a
                          , fieldPatternInfo :: a
                          }
   | FieldWildcardPattern { fieldPatternInfo :: a }
+  deriving Show
                        
-                  
 data Splice a
   = IdSplice { spliceId :: Name a
              , spliceInfo :: a 
@@ -670,16 +686,17 @@ data Splice a
   | ParenSplice { spliceExpr :: Expr a
                 , spliceInfo :: a
                 }
+  deriving Show
                
 data QQString a
   = QQString { qqString :: String
              , qqInfo :: a
-             }
+             } deriving Show
               
 data Binds a
-  = DeclBindings     { bindingDecls :: ASTList Decl a
-                     , bindingInfo :: a
-                     }
+  = DeclBindings { bindingDecls :: ASTList Decl a
+                 , bindingInfo :: a
+                 } deriving Show
    
 -- | Clause of function binding   
 data Match a
@@ -689,7 +706,7 @@ data Match a
           , matchRhs :: Rhs a
           , matchBinds :: ASTMaybe Binds a
           , matchInfo :: a
-          }
+          } deriving Show
     
 -- | Clause of case expression          
 data Alt a
@@ -697,7 +714,7 @@ data Alt a
         , altRhs :: Rhs a
         , altBinds :: ASTMaybe Binds a
         , altInfo :: a
-        }
+        } deriving Show
         
 data Rhs a
   = UnguardedRhs { rhsExpr :: Expr a
@@ -706,12 +723,13 @@ data Rhs a
   | GuardedRhss  { rhsGuards :: ASTList GuardedRhs a
                  , rhsInfo :: a
                  }
+  deriving Show
                
 data GuardedRhs a
   = GuardedRhs { guardStmts :: ASTList Stmt a
                , guardExpr :: Expr a
                , guardInfo :: a
-               }
+               } deriving Show
                
 data FieldUpdate a 
   = NormalFieldUpdate { fieldName :: Name a
@@ -722,6 +740,7 @@ data FieldUpdate a
                       , fieldUpdateInfo :: a
                       }
   | FieldWildcard     { fieldUpdateInfo :: a }
+  deriving Show
                
 data Bracket a
   = ExprBracket    { bracketExpr :: Expr a
@@ -736,4 +755,5 @@ data Bracket a
   | DeclBracket    { bracketDecl :: Decl a
                    , bracketInfo :: a
                    }
+  deriving Show
                   

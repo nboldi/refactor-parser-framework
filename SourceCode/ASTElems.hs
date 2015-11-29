@@ -7,6 +7,7 @@
 module SourceCode.ASTElems where
 
 import SourceCode.ASTNode
+import SourceCode.SourceInfo
 
 -- TODO: add isos for pairs, triples and lists to a pair of a tuple or list and an info
 -- TODO: add infos to pairs and triples
@@ -118,20 +119,48 @@ instance (Generic (n a), Generic (m a), Generic (p a), ASTNode n a, ASTNode m a,
     
 -- | A list of AST elements.
 data ASTList e a 
+  = ASTList { _listElems :: ASTListElems e a 
+            , _listInfo  :: a
+            }
+            
+data ASTListElems e a
   = ASTCons { _listHead      :: e a
-            , _listTail      :: ASTList e a 
-            , _listInfo      :: a 
+            , _listTail      :: ASTListElems e a
             }
   | ASTNil
-            
+  
+astNil :: SourceInfo a => ASTList e a
+astNil = ASTList ASTNil noNodeInfo
+  
+astAppend :: e a -> ASTList e a -> ASTList e a 
+astAppend e (ASTList ls i) = ASTList (astListAppendElem e ls) i 
+  where astListAppendElem e (ASTCons h t) = astListAppendElem e t
+        astListAppendElem e ASTNil        = ASTCons e ASTNil 
+  
+astCons :: e a -> ASTList e a -> ASTList e a 
+astCons e (ASTList ls i) = ASTList (ASTCons e ls) i
+
+astCons' :: e a -> ASTList e a -> a -> ASTList e a 
+astCons' e (ASTList ls _) newInfo = ASTList (ASTCons e ls) newInfo
+  
+-- | Views the ast list as a list of elements and a last element
+viewAstListReverse :: ASTList e a -> Maybe (ASTList e a, e a)
+viewAstListReverse (ASTList ls i) = fmap (\(init, last) -> (ASTList init i, last)) (viewElems ls)
+  where viewElems (ASTCons head rest@(ASTCons _ _)) 
+          = fmap (\(init, last) -> (ASTCons head init, last)) (viewElems rest)
+        viewElems (ASTCons last ASTNil) = Just (ASTNil, last)
+        viewElems ASTNil                = Nothing
+  
 makeLenses ''ASTList
+makeLenses ''ASTListElems
             
 astGetList :: ASTList e a -> [e a]
-astGetList (ASTCons listHead listTail _) = listHead : astGetList listTail
-astGetList (ASTNil) = []
+astGetList (ASTList elems _) = astGetListElems elems
+  where astGetListElems (ASTCons listHead listTail) = listHead : astGetListElems listTail
+        astGetListElems (ASTNil) = []
 
 wrapASTList :: [e a] -> a -> ASTList e a
-wrapASTList l a = foldr (\e t -> ASTCons e t a) ASTNil l
+wrapASTList l a = ASTList (foldr (\e t -> ASTCons e t) ASTNil l) a
             
 deriving instance (Show a, Show (e a)) => Show (ASTList e a)
 deriving instance (Eq a, Eq (e a)) => Eq (ASTList e a)
@@ -140,6 +169,14 @@ deriving instance Functor e => Functor (ASTList e)
 deriving instance Generic (e a) => Generic (ASTList e a)
 deriving instance Typeable ASTList
 deriving instance (Data a, Data (e a), Typeable e) => Data (ASTList e a)
+
+deriving instance (Show a, Show (e a)) => Show (ASTListElems e a)
+deriving instance (Eq a, Eq (e a)) => Eq (ASTListElems e a)
+deriving instance (Ord a, Ord (e a)) => Ord (ASTListElems e a)
+deriving instance Functor e => Functor (ASTListElems e)
+deriving instance Generic (e a) => Generic (ASTListElems e a)
+deriving instance Typeable ASTListElems
+deriving instance (Data a, Data (e a), Typeable e) => Data (ASTListElems e a)
 
 type ASTParenList e = ASTWrapper (ASTList e)
 

@@ -95,10 +95,11 @@ genMemberSimple :: MemberDerefNI
 genMemberSimple = SimpleMember (genInfo ( "." +> [] ))
                       
 astFilter :: (e NI -> Maybe (f NI)) -> ASTList e NI -> ASTList f NI
-astFilter pred (ASTCons listHead listTail listInfo) 
-  = case pred listHead of Just x  -> ASTCons x (astFilter pred listTail) listInfo
-                          Nothing -> astFilter pred listTail
-astFilter pred ASTNil = ASTNil
+astFilter pred (ASTList elems info) = ASTList (astFilterElems pred elems) info
+  where astFilterElems pred (ASTCons listHead listTail) 
+          = case pred listHead of Just x  -> ASTCons x (astFilterElems pred listTail)
+                                  Nothing -> astFilterElems pred listTail
+        astFilterElems pred ASTNil = ASTNil
 
 
 

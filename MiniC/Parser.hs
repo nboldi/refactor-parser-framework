@@ -256,9 +256,9 @@ enumeration :: CParser EnumerationBI
 enumeration 
   = withInfo $ Enumeration 
                  <$> astOptionMaybe identifier 
-                 <*> astOptionMaybe ( braces (withInfo $ ASTCons <$> variant 
-                                                                 <*> astMany (try $ comma *> variant) 
-                                                                 <* optional comma))
+                 <*> astOptionMaybe ( braces (withInfo $ astCons' <$> variant 
+                                                                  <*> astMany (try $ comma *> variant) 
+                                                                  <* optional comma))
 
 variant :: CParser VariantBI
 variant = withInfo $ Variant <$> identifier 
@@ -445,21 +445,21 @@ compoundElem
      ( CompoundLitElem <$> astMany1 ( withInfo $ ( MemberDesignator <$> (symbol "." *> identifier) )
                                   <|> ( ArrDesignator <$> brackets expression ) )
           <*> ( symbol "=" *> expressionWithoutComma ) )
-     <|> (CompoundLitElem <$> pure ASTNil <*> expressionWithoutComma)
+     <|> (CompoundLitElem <$> pure astNil <*> expressionWithoutComma)
 
 -- * Helper parsers. Used to parse common AST elements in special ways.
             
 astMany :: CParser (e BI) -> CParser (ASTList e BI)
-astMany p = withInfo (ASTCons <$> p <*> astMany p) <|> pure ASTNil
+astMany p = withInfo (astCons' <$> p <*> astMany p) <|> pure astNil
 
 astMany1 :: CParser (e BI) -> CParser (ASTList e BI)
-astMany1 p = withInfo (ASTCons <$> p <*> astMany p)
+astMany1 p = withInfo (astCons' <$> p <*> astMany p)
 
 astSepBy :: CParser (e BI) -> CParser sep -> CParser (ASTList e BI)
-astSepBy p sep = astSepBy1 p sep <|> pure ASTNil
+astSepBy p sep = astSepBy1 p sep <|> pure astNil
 
 astSepBy1 :: CParser (e BI) -> CParser sep -> CParser (ASTList e BI)
-astSepBy1 p sep = withInfo (ASTCons <$> p <*> astMany (sep *> p))
+astSepBy1 p sep = withInfo (astCons' <$> p <*> astMany (sep *> p))
 
 astOptionMaybe :: CParser (e BI) -> CParser (ASTMaybe e BI)
 astOptionMaybe = (view (from astMaybe) <$>) . optionMaybe

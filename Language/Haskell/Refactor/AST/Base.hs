@@ -1,27 +1,32 @@
 module Language.Haskell.Refactor.AST.Base where
 
 import SourceCode.ASTElems
-
-data QName a = QName { qualifiers :: ASTList Name a
-                     , unqualifiedName :: Name a 
-                     , qnameInfo :: a
-                     }
   
 -- | Contains also implicit names.
 -- Linear implicit parameter: @%x@. Non-linear implicit parameter: @?x@.
-data Name a = Name { nameStr :: String
-                   , nameInfo :: a
+data Name a = Name { qualifiers      :: ASTList SimpleName a
+                   , unqualifiedName :: SimpleName a 
+                   , qnameInfo       :: a
                    } deriving Show
+                  
+data SimpleName a 
+  = SimpleName { simplNameStr  :: String
+               , simpleNameInfo :: a
+               } deriving Show
+                   
 data DataOrNewKeyword a
   = DataKeyword { dataKeywordInfo :: a }
   | NewdataKeyword { dataKeywordInfo :: a }
+  deriving Show
     
 data DoKind a
   = DoKeyword { doKeywordInfo :: a }
   | MDoKeyword { doKeywordInfo :: a }
+  deriving Show
   
 data TypeKeyword a
   = TypeKeyword { typeKeywordInfo :: a }
+  deriving Show
   
 data CallConv a
   = StdCall    { callConvInfo :: a }
@@ -32,30 +37,34 @@ data CallConv a
   | Js         { callConvInfo :: a }
   | JavaScript { callConvInfo :: a }
   | CApi       { callConvInfo :: a }
+  deriving Show
   
 data ArrowAppl a
   = LeftAppl     { arrowApplInfo :: a }
   | RightAppl    { arrowApplInfo :: a }
   | LeftHighApp  { arrowApplInfo :: a }
   | RightHighApp { arrowApplInfo :: a }
+  deriving Show
   
 data Safety a
   = Safe          { safetyKeywordInfo :: a }
   | ThreadSafe    { safetyKeywordInfo :: a }
   | Unsafe        { safetyKeywordInfo :: a }
   | Interruptible { safetyKeywordInfo :: a }
+  deriving Show
 
 -- | Associativity of an operator.
 data Assoc a
   = AssocNone { assocInfo :: a } -- ^ non-associative operator (declared with @infix@)
   | AssocLeft { assocInfo :: a } -- ^ left-associative operator (declared with @infixl@)
   | AssocRight { assocInfo :: a } -- ^ right-associative operator (declared with @infixr@)
+  deriving Show
   
 -- | Numeric precedence of an operator
 data Precedence a
   = Precedence { precedenceValue :: Int
                , precedenceInfo :: a
-               }
+               } deriving Show
                
 data Literal a
   = CharLit       { charLitValue :: Char 
@@ -85,6 +94,7 @@ data Literal a
   | PrimStringLit { stringLitValue :: String 
                   , literalInfo :: a
                   }
+  deriving Show
                
 data Promoted a
   = PromotedInt    { promotedIntValue :: Integer
@@ -103,4 +113,5 @@ data Promoted a
                    , promotedInfo :: a
                    }
   | PromotedUnit   { promotedInfo :: a }
+  deriving Show
                
