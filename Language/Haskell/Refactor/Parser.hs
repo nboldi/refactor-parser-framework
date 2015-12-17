@@ -1,6 +1,9 @@
-module Language.Haskell.Refactor.Parser where
+module Language.Haskell.Refactor.Parser
+ ( module Language.Haskell.Refactor.Parser.Base 
+ ) where
 
-import module Language.Haskell.Refactor.AST
+import Language.Haskell.Refactor.AST
+import Language.Haskell.Refactor.Parser.Base 
 
 
 

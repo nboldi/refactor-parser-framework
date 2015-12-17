@@ -19,8 +19,7 @@ import Data.Char
 import Language.Haskell.Refactor.AST.Base
 
 
-type BI = TI.BI ()
-type NI = TI.NI ()
+type BI = NodeInfo BasicInfo ()
 
 type HaskellParser a = ParsecT String () Identity a
 
@@ -44,16 +43,17 @@ withNewInfo p = withInfo (p >>= \res -> return $ \inf -> setInfo inf res)
       
 -- * Basic constructs
 
-qName :: HaskellParser (QName BI)
-qName = withInfo $ QName <$> astSepBy name (symbol ".") <*> name
-
 name :: HaskellParser (Name BI)
-name = withInfo $ Name <$> ((maybe id (++) <$> optionMaybe (symbol "?" <|> symbol "%")) 
-                              <*> many1 (satisfy isIdent))
+name = withInfo $ Name <$> astMany (try (qualifier <* symbol ".")) <*> simpleName
 
-operator :: HaskellParser (Name BI)
-operator = withInfo $ Name <$> many1 (satisfy isHSymbol)
+simpleName :: HaskellParser (SimpleName BI)
+simpleName = withInfo $ SimpleName <$> ((maybe id (++) <$> optionMaybe (symbol "?" <|> symbol "%")) 
+                                          <*> many1 (satisfy isIdent))
+                          <|> SimpleName <$> many1 (satisfy isHSymbol)
 
+qualifier :: HaskellParser (SimpleName BI)
+qualifier = withInfo $ SimpleName <$> many1 (satisfy isIdent)
+                          
 isIdent, isHSymbol, isPragmaChar :: Char -> Bool
 isIdent c = isAlphaNum c || c == '\'' || c == '_'
 
@@ -81,16 +81,16 @@ whiteSpace = void $ many (oneOf " \n\t")
 -- * Helper parsers. Used to parse common AST elements in special ways.
             
 astMany :: HaskellParser (e BI) -> HaskellParser (ASTList e BI)
-astMany p = withInfo (ASTCons <$> p <*> astMany p) <|> pure ASTNil
+astMany p = (astCons <$> p <*> astMany p) <|> pure astNil
 
 astMany1 :: HaskellParser (e BI) -> HaskellParser (ASTList e BI)
-astMany1 p = withInfo (ASTCons <$> p <*> astMany p)
+astMany1 p = astCons <$> p <*> astMany p
 
 astSepBy :: HaskellParser (e BI) -> HaskellParser sep -> HaskellParser (ASTList e BI)
-astSepBy p sep = astSepBy1 p sep <|> pure ASTNil
+astSepBy p sep = astSepBy1 p sep <|> pure astNil
 
 astSepBy1 :: HaskellParser (e BI) -> HaskellParser sep -> HaskellParser (ASTList e BI)
-astSepBy1 p sep = withInfo (ASTCons <$> p <*> astMany (sep *> p))
+astSepBy1 p sep = astCons <$> p <*> astMany (sep *> p)
 
 astOptionMaybe :: HaskellParser (e BI) -> HaskellParser (ASTMaybe e BI)
 astOptionMaybe = (view (from astMaybe) <$>) . optionMaybe
