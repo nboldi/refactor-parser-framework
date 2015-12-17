@@ -26,14 +26,14 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +0 Data/SmartTrav.hs
-badd +0 Data/SmartTrav/Class.hs
-badd +0 Data/SmartTrav/Example.hs
-badd +0 Data/SmartTrav/Indexing.hs
-badd +0 Data/SmartTrav/Instances.hs
-badd +0 Data/SmartTrav/TH.hs
-args Data/SmartTrav.hs
-edit Data/SmartTrav.hs
+badd +0 src/Data/SmartTrav.hs
+badd +0 src/Data/SmartTrav/Class.hs
+badd +0 src/Data/SmartTrav/Example.hs
+badd +0 src/Data/SmartTrav/Indexing.hs
+badd +0 src/Data/SmartTrav/Instances.hs
+badd +0 src/Data/SmartTrav/TH.hs
+args src/Data/SmartTrav.hs
+edit src/Data/SmartTrav.hs
 set splitbelow splitright
 set nosplitbelow
 set nosplitright
@@ -148,7 +148,7 @@ exe s:l
 normal! zt
 1
 normal! 0
-tabedit Data/SmartTrav/Class.hs
+tabedit src/Data/SmartTrav/Class.hs
 set splitbelow splitright
 set nosplitbelow
 set nosplitright
@@ -263,7 +263,7 @@ exe s:l
 normal! zt
 1
 normal! 0
-tabedit Data/SmartTrav/Example.hs
+tabedit src/Data/SmartTrav/Example.hs
 set splitbelow splitright
 set nosplitbelow
 set nosplitright
@@ -378,7 +378,7 @@ exe s:l
 normal! zt
 1
 normal! 0
-tabedit Data/SmartTrav/Indexing.hs
+tabedit src/Data/SmartTrav/Indexing.hs
 set splitbelow splitright
 set nosplitbelow
 set nosplitright
@@ -493,7 +493,7 @@ exe s:l
 normal! zt
 1
 normal! 0
-tabedit Data/SmartTrav/Instances.hs
+tabedit src/Data/SmartTrav/Instances.hs
 set splitbelow splitright
 set nosplitbelow
 set nosplitright
@@ -608,7 +608,7 @@ exe s:l
 normal! zt
 1
 normal! 0
-tabedit Data/SmartTrav/TH.hs
+tabedit src/Data/SmartTrav/TH.hs
 set splitbelow splitright
 set nosplitbelow
 set nosplitright
