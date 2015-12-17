@@ -7,6 +7,8 @@ import SourceCode.SourceInfo as AST
 import Text.Parsec.PosOps as AST
 import Text.Parsec.Pos as AST
 
+import Data.Maybe
+
 import HsSyn as GHC
 import Module as GHC
 import SrcLoc as GHC
@@ -35,7 +37,22 @@ trfPragmas :: Maybe (Located WarningTxt) -> Maybe LHsDocString -> ASTList Module
 trfPragmas = undefined
 
 trfExportList :: Maybe (Located [LIE RdrName]) -> ASTMaybe ExportSpecList RI
-trfExportList = undefined
+trfExportList Nothing           = ASTNothing
+trfExportList (Just (L l exps)) = ASTJust (ExportSpecList (wrapASTList (mapMaybe trfExport exps) (trfLoc l)) 
+                                                                       (trfLoc l))
+  
+trfExport :: LIE RdrName -> Maybe (ExportSpec RI)
+trfExport (L l (IEVar n)) = Just (ExportDecl (trfName n) ASTNothing (trfLoc l))
+trfExport (L l (IEThingAbs n)) = Just (ExportDecl (trfName n) ASTNothing (trfLoc l))
+-- TODO: used annotations to specify subspecifier locations
+trfExport (L l (IEThingAll n)) 
+  = Just (ExportDecl (trfName n) (ASTJust (ExportSubSpecAll noNodeInfo)) (trfLoc l))
+trfExport (L l (IEThingWith n ls)) 
+  = Just (ExportDecl (trfName n) 
+                     (ASTJust (ExportSubSpecList (wrapASTList (map trfName ls) noNodeInfo) noNodeInfo)) 
+         (trfLoc l))
+trfExport (L l (IEModuleContents n)) = Just (ExportModule (trfModuleNameL n) (trfLoc l))
+trfExport _ = Nothing -- documentation. TODO: unify ranges
   
 trfImports :: [LImportDecl RdrName] -> ASTList AST.ImportDecl RI
 trfImports = undefined
@@ -72,6 +89,8 @@ trfRealLoc rss
   = SourceRange (newPos (unpackFS $ srcSpanFile rss) (srcSpanStartLine rss) (srcSpanStartCol rss))
                 (newPos (unpackFS $ srcSpanFile rss) (srcSpanEndLine rss)   (srcSpanEndCol rss))
 
+                
+                
 pprStr :: Outputable a => a -> String
 pprStr = showSDocUnsafe . ppr
                 

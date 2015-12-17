@@ -24,23 +24,20 @@ data ExportSpecList a
                    } deriving Show
   
 data ExportSpec a
-  = ExportVar { evNamespace :: ASTMaybe TypeNamespace a
-              , evName      :: Name a
-              , evInfo      :: a
-              }
-  | ExportAbstract { eAbsName :: Name a
-                   , eAbsInfo :: a
-                   }
-  | ExportAll { eAllName :: Name a
-              , eAllInfo :: a
-              }
-  | ExportWith { eWithName  :: Name a
-               , eWithDecls :: ASTList Name a
-               , eWithInfo  :: a
-               }
-  | ExportModule { eModName :: Name a
-                 , eModInfo :: a 
+  = ExportDecl { exportName    :: Name a
+               , exportSubspec :: ASTMaybe ExportSubSpec a
+               , exportInfo    :: a
+               } -- Export a declaration
+  | ExportModule { exportName    :: Name a
+                 , exportInfo    :: a
                  }
+  deriving Show
+
+data ExportSubSpec a
+  = ExportSubSpecAll  { essInfo :: a } -- @T(..)@: a class exported with all of its methods, or a datatype exported with all of its constructors.
+  | ExportSubSpecList { essList :: ASTList Name a
+                      , essInfo :: a 
+                      } -- @T(a,b,c)@: a class exported with some of its methods, or a datatype exported with some of its constructors.
   deriving Show
                  
 data ModulePragma a
