@@ -16,16 +16,23 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     Data.SmartTrav
+                     , Data.SmartTrav.Class
+                     , Data.SmartTrav.Example
+                     , Data.SmartTrav.Indexing
+                     , Data.SmartTrav.Instances
+                     , Data.SmartTrav.TH
   build-depends:       base >= 4.7 && < 5
+                     , template-haskell >= 2.10.0.0
+                     , mtl >= 2.2.1
   default-language:    Haskell2010
 
-executable smart-traversal-exe
-  hs-source-dirs:      app
-  main-is:             Main.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , smart-traversal
-  default-language:    Haskell2010
+--executable smart-traversal-exe
+--  hs-source-dirs:      app
+--  main-is:             Main.hs
+--  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+--  build-depends:       base
+--                     , smart-traversal
+--  default-language:    Haskell2010
 
 test-suite smart-traversal-test
   type:                exitcode-stdio-1.0
