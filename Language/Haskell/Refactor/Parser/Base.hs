@@ -78,8 +78,9 @@ lexeme p = whiteSpace >> p
 whiteSpace :: HaskellParser ()
 whiteSpace = void $ many (oneOf " \n\t")
 
-parens :: HaskellParser a -> HaskellParser a
+parens, pragmaBraces :: HaskellParser a -> HaskellParser a
 parens p = symbol "(" *> p <* symbol ")"
+pragmaBraces p = symbol "{-#" *> p <* symbol "#-}"
 
 comma :: HaskellParser ()
 comma = void $ symbol ","

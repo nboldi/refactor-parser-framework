@@ -60,7 +60,7 @@ data ImportDecl a
                , importQualified    :: ASTMaybe ImportQualified a
                , importSource       :: ASTMaybe ImportSource a
                , importSafe         :: ASTMaybe ImportSafe a
-               , importPkg          :: ASTMaybe Name a
+               , importPkg          :: ASTMaybe PackageName a
                , importAs           :: ASTMaybe ImportRenaming a
                , importInfo         :: a
                } -- ^ An import declaration
@@ -70,6 +70,10 @@ data ImportQualified a  = ImportQualified   { importQualifiedInfo :: a } derivin
 data ImportSource a     = ImportSource      { importSourceInfo :: a } deriving Show
 data ImportSafe a       = ImportSafe        { importSafeInfo :: a } deriving Show
 data TypeNamespace a    = TypeNamespace     { typeNamespaceInfo :: a } deriving Show
+
+data PackageName a = PackageName { packageNameStr :: String
+                                 , packageNameInfo :: a 
+                                 } deriving Show
 
 data ImportRenaming a = ImportRenaming { importRenamingName :: Name a
                                        , importRenamingInfo :: a 

@@ -25,8 +25,14 @@ exportSubSpecification = withInfo $ parens (symbol ".." *> return ExportSubSpecA
                                               <|> ExportSubSpecList <$> astMany1 name)
 
 modulePragma :: HaskellParser (ModulePragma BI)
-modulePragma = undefined
+modulePragma = fail "not implemented"
 
 moduleImport :: HaskellParser (ImportDecl BI)
-moduleImport = undefined
+moduleImport = withInfo 
+  $ ImportDecl <$> (symbol "import" *> name)
+               <*> astOptionMaybe (withInfo $ symbol "qualified" *> return ImportQualified)
+               <*> astOptionMaybe (withInfo $ pragmaBraces (symbol "SOURCE") *> return ImportSource)
+               <*> astOptionMaybe (withInfo $ symbol "safe" *> return ImportSafe)
+               <*> astOptionMaybe (withInfo $ PackageName <$> many1 (alphaNum <|> oneOf "-._"))
+               <*> astOptionMaybe (withInfo $ symbol "as" *> (ImportRenaming <$> name))
 
