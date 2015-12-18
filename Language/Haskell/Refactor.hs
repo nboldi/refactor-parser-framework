@@ -10,6 +10,8 @@ import Text.Parsec
 import Text.Parsec.Error
 
 import Language.Haskell.Refactor.Parser.Base
+import Language.Haskell.Refactor.Parser.Decl
+import Language.Haskell.Refactor.Parser.Module
 import SourceCode.ToSourceTree
 import SourceCode.InfoTypes
 import SourceCode.PrettyPrint

@@ -78,6 +78,12 @@ lexeme p = whiteSpace >> p
 whiteSpace :: HaskellParser ()
 whiteSpace = void $ many (oneOf " \n\t")
 
+parens :: HaskellParser a -> HaskellParser a
+parens p = symbol "(" *> p <* symbol ")"
+
+comma :: HaskellParser ()
+comma = void $ symbol ","
+
 -- * Helper parsers. Used to parse common AST elements in special ways.
             
 astMany :: HaskellParser (e BI) -> HaskellParser (ASTList e BI)

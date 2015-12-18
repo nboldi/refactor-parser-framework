@@ -12,12 +12,14 @@ data Module a
            , modInfo    :: a 
            } deriving Show
 
+-- | Module declaration with name and (optional) exports
 data ModuleHead a
   = ModuleHead { mhName    :: Name a
                , mhExports :: ASTMaybe ExportSpecList a
                , mhInfo    :: a
                } deriving Show
 
+-- | A list of export specifications surrounded by parentheses
 data ExportSpecList a
   = ExportSpecList { espExports :: ASTList ExportSpec a 
                    , espInfo    :: a
