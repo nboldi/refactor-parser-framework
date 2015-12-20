@@ -4,4 +4,4 @@ import Language.Haskell.Refactor.AST.Decl
 import Language.Haskell.Refactor.Parser.Base
 
 decl :: HaskellParser (Decl BI)
-decl = undefined
+decl = fail "not implemented"

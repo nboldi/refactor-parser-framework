@@ -22,14 +22,27 @@ test = tests >>= runTestTT
   
 tests = do progTests <- programTests 
            return $ TestList 
-                      [ TestLabel "nameTests" nameTests
+                      [ TestLabel "module tests" moduleTests
+                      , TestLabel "exportDeclTests" exportDeclTests
+                      , TestLabel "importDeclTests" importDeclTests
+                      , TestLabel "nameTests" nameTests
                       ]
                       
 programTests = return []
 
-nameTests = TestList $ map (\n -> TestLabel n $ TestCase (assertParsedOk name n)) names
 
-names = [ "A.B.almafa", "A.B.+", "almafa", "?implicit", "%linearImplicit", "a'", "a_b_", "+", "++", ":!:" ]
+moduleTests = TestList $ map (\n -> TestLabel n $ TestCase (assertParsedOk module_ n)) modules
+modules = [ "", "module A where", "module A where import B.C", "module A(a,b,c) where" ]
+
+exportDeclTests = TestList $ map (\n -> TestLabel n $ TestCase (assertParsedOk ieDecl n)) exportDecls
+exportDecls = [ "a", "A.B.c", "C", "C(..)", "C(a,b)" ]
+
+importDeclTests = TestList $ map (\n -> TestLabel n $ TestCase (assertParsedOk moduleImport n)) importDecls
+importDecls = [ "import a", "import A.B.C", "import A as X", "import A(a,b,C(..))", "import A()", "import qualified A", "import {-# SOURCE #-} A", "import A hiding (x,y)", "import \"some-package\" A" ]
+
+
+nameTests = TestList $ map (\n -> TestLabel n $ TestCase (assertParsedOk name n)) names
+names = [ "A.B.almafa", "A.B.+", "almafa \n\t ", "?implicit", "%linearImplicit", "A", "A.B.C", "a'", "a_b_", "+", "++", ":!:" ]
 
 
 -- * Helper functions

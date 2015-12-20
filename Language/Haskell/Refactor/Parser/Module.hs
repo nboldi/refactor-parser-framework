@@ -13,26 +13,28 @@ moduleHead :: HaskellParser (ModuleHead BI)
 moduleHead = withInfo $ ModuleHead <$> (symbol "module" *> name) <*> (astOptionMaybe exportSpecList <* symbol "where")
 
 exportSpecList :: HaskellParser (ExportSpecList BI)
-exportSpecList = withInfo $ ExportSpecList <$> parens (astSepBy exportDecl comma)
+exportSpecList = withInfo $ ExportSpecList <$> parens (astSepBy ieDecl comma)
 
-exportDecl :: HaskellParser (ExportSpec BI)
-exportDecl = withInfo $ 
-  ExportModule <$> (symbol "module" *> name)
-    <|> ExportDecl <$> (optional (symbol "pattern") *> name) <*> astOptionMaybe exportSubSpecification
+ieDecl :: HaskellParser (IESpec BI)
+ieDecl = withInfo $ 
+  IEModule <$> (symbol "module" *> name)
+    <|> IEDecl <$> (optional (symbol "pattern") *> name) <*> astOptionMaybe exportSubSpecification
     
 exportSubSpecification :: HaskellParser (ExportSubSpec BI)
 exportSubSpecification = withInfo $ parens (symbol ".." *> return ExportSubSpecAll 
-                                              <|> ExportSubSpecList <$> astMany1 name)
+                                              <|> ExportSubSpecList <$> astSepBy1 name comma)
 
 modulePragma :: HaskellParser (ModulePragma BI)
 modulePragma = fail "not implemented"
 
 moduleImport :: HaskellParser (ImportDecl BI)
-moduleImport = withInfo 
-  $ ImportDecl <$> (symbol "import" *> name)
-               <*> astOptionMaybe (withInfo $ symbol "qualified" *> return ImportQualified)
-               <*> astOptionMaybe (withInfo $ pragmaBraces (symbol "SOURCE") *> return ImportSource)
-               <*> astOptionMaybe (withInfo $ symbol "safe" *> return ImportSafe)
-               <*> astOptionMaybe (withInfo $ PackageName <$> many1 (alphaNum <|> oneOf "-._"))
-               <*> astOptionMaybe (withInfo $ symbol "as" *> (ImportRenaming <$> name))
+moduleImport = withInfo $ (symbol "import" *>) $
+  ImportDecl <$> astOptionMaybe (withInfo $ symbol "qualified" *> return ImportQualified)
+             <*> astOptionMaybe (withInfo $ pragmaBraces (symbol "SOURCE") *> return ImportSource)
+             <*> astOptionMaybe (withInfo $ symbol "safe" *> return ImportSafe)
+             <*> astOptionMaybe (withInfo $ PackageName <$> stringLiteral)
+             <*> name
+             <*> astOptionMaybe (withInfo $ symbol "as" *> (ImportRenaming <$> name))
+             <*> astOptionMaybe (withInfo $ symbol "hiding" *> (ImportSpecHiding <$> parens (astSepBy ieDecl comma))
+                                             <|> (ImportSpecList <$> parens (astSepBy ieDecl comma)))
 

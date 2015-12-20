@@ -4,7 +4,7 @@ module Language.Haskell.Refactor.Parser.Base where
 import SourceCode.InfoTypes
 import Text.Parsec
 import qualified Text.Parsec.Token as P
-import Control.Lens
+import Control.Lens (view, from)
 import Control.Monad.Identity
 import Control.Applicative hiding ((<|>), many)
 import Text.Parsec.ExtraCombinators
@@ -44,11 +44,11 @@ withNewInfo p = withInfo (p >>= \res -> return $ \inf -> setInfo inf res)
 -- * Basic constructs
 
 name :: HaskellParser (Name BI)
-name = withInfo $ Name <$> astMany (try (qualifier <* symbol ".")) <*> simpleName
+name = withInfo $ lexeme $ Name <$> astMany (try (qualifier <* symbol ".")) <*> simpleName
 
 simpleName :: HaskellParser (SimpleName BI)
 simpleName = withInfo $ SimpleName <$> ((maybe id (++) <$> optionMaybe (symbol "?" <|> symbol "%")) 
-                                          <*> many1 (satisfy isIdent))
+                                          <*> many1 (satisfy isIdent)) 
                           <|> SimpleName <$> many1 (satisfy isHSymbol)
 
 qualifier :: HaskellParser (SimpleName BI)
@@ -73,7 +73,7 @@ symbol :: String -> HaskellParser String
 symbol = lexeme . string
 
 lexeme :: HaskellParser a -> HaskellParser a
-lexeme p = whiteSpace >> p
+lexeme p = p <* whiteSpace
 
 whiteSpace :: HaskellParser ()
 whiteSpace = void $ many (oneOf " \n\t")
@@ -84,6 +84,9 @@ pragmaBraces p = symbol "{-#" *> p <* symbol "#-}"
 
 comma :: HaskellParser ()
 comma = void $ symbol ","
+
+stringLiteral :: HaskellParser String
+stringLiteral = lexeme (char '"' *> many (noneOf "\"") <* char '"')
 
 -- * Helper parsers. Used to parse common AST elements in special ways.
             
