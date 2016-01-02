@@ -15,6 +15,7 @@ import SourceCode.Semantics
 import qualified SourceCode.TransformInfo as TI
 import Text.Parsec
 import Data.Char
+import qualified Data.Set as Set
 
 import Language.Haskell.Refactor.AST.Base
 
@@ -43,13 +44,32 @@ withNewInfo p = withInfo (p >>= \res -> return $ \inf -> setInfo inf res)
       
 -- * Basic constructs
 
+overlapPragma :: HaskellParser (OverlapPragma BI)
+overlapPragma = withInfo 
+    $ pragmaBraces (symbol "OVERLAP" *> return EnableOverlap)
+  <|> pragmaBraces (symbol "NO_OVERLAP" *> return DisableOverlap)
+  <|> pragmaBraces (symbol "OVERLAPPABLE" *> return Overlappable)
+  <|> pragmaBraces (symbol "OVERLAPPING" *> return Overlapping)
+  <|> pragmaBraces (symbol "OVERLAPS" *> return Overlaps)
+  <|> pragmaBraces (symbol "INCOHERENT" *> return IncoherentOverlap)
+
+assoc :: HaskellParser (Assoc BI)
+assoc = withInfo 
+    $ (symbol "infixr" *> return AssocRight)
+  <|> (symbol "infixl" *> return AssocLeft)
+  <|> (symbol "infix" *> return AssocNone)
+  
 name :: HaskellParser (Name BI)
 name = withInfo $ lexeme $ Name <$> astMany (try (qualifier <* symbol ".")) <*> simpleName
 
 simpleName :: HaskellParser (SimpleName BI)
 simpleName = withInfo $ SimpleName <$> ((maybe id (++) <$> optionMaybe (symbol "?" <|> symbol "%")) 
-                                          <*> many1 (satisfy isIdent)) 
-                          <|> SimpleName <$> many1 (satisfy isHSymbol)
+                                          <*> (many1 (satisfy isIdent) >>= \n -> when (Set.member n reservedNames) (fail "reserved name") >> return n)) 
+                          <|> SimpleName <$> (many1 (satisfy isHSymbol) >>= \n -> when (Set.member n reservedOps) (fail "reserved operator") >> return n)
+
+reservedNames = Set.fromList ["_", "class", "data", "default", "deriving", "do", "else", "hiding", "if", "import", "in", "infix", "infixl", "infixr", "instance", "let", "module", "newtype", "of", "qualified", "then", "type", "where", "family", "role", "static"]
+
+reservedOps = Set.fromList ["..", "::", "=", "\\", "|", "<-", "->", "@", "~", "=>", "-", "!"]
 
 qualifier :: HaskellParser (SimpleName BI)
 qualifier = withInfo $ SimpleName <$> many1 (satisfy isIdent)
@@ -61,6 +81,32 @@ isHSymbol c = c `elem` ":!#%&*./?@\\-" || ((isSymbol c || isPunctuation c) && no
 
 isPragmaChar c = isAlphaNum c || c == '_'
 
+dataOrNew :: HaskellParser (DataOrNewtypeKeyword BI)
+dataOrNew = withInfo $ choice 
+  [ symbol "data"    *> return DataKeyword
+  , symbol "newtype" *> return NewtypeKeyword
+  ]   
+
+callConv :: HaskellParser (CallConv BI)
+callConv = withInfo $ choice 
+  [ symbol "stdcall"    *> pure StdCall
+  , symbol "ccall"      *> pure CCall
+  , symbol "cplusplus"  *> pure CPlusPlus
+  , symbol "dotnet"     *> pure DotNet
+  , symbol "jvm"        *> pure Jvm
+  , symbol "js"         *> pure Js
+  , symbol "javascript" *> pure JavaScript
+  , symbol "capi"       *> pure CApi
+  ]
+
+safety :: HaskellParser (Safety BI)
+safety = withInfo $ choice 
+  [ symbol "safe"          *> pure Safe
+  , symbol "unsafe"        *> pure Unsafe
+  , symbol "threadsafe"    *> pure ThreadSafe
+  , symbol "interruptable" *> pure Interruptible
+  ]
+  
 -- * Lexical analysis
 
 whole :: HaskellParser a -> HaskellParser a
@@ -76,7 +122,14 @@ lexeme :: HaskellParser a -> HaskellParser a
 lexeme p = p <* whiteSpace
 
 whiteSpace :: HaskellParser ()
-whiteSpace = void $ many (oneOf " \n\t")
+whiteSpace = void $ many (void (oneOf " \n\t") <|> comment)
+
+comment :: HaskellParser ()
+comment = void $ 
+      try (string "--" <* notFollowedBy (satisfy isHSymbol))
+         <* many (noneOf "\n")
+  <|> try (string "{-" <* notFollowedBy (char '#'))
+         <* manyTill anyChar (string "-}")
 
 parens, pragmaBraces :: HaskellParser a -> HaskellParser a
 parens p = symbol "(" *> p <* symbol ")"
@@ -87,6 +140,31 @@ comma = void $ symbol ","
 
 stringLiteral :: HaskellParser String
 stringLiteral = lexeme (char '"' *> many (noneOf "\"") <* char '"')
+
+integer :: HaskellParser Integer
+integer = lexeme int
+
+-- integers and naturals
+int             = lexeme sign <*> nat
+
+sign            =   (char '-' *> pure negate)
+                <|> (char '+' *> pure id)
+                <|> pure id
+
+nat             = zeroNumber <|> decimal
+
+zeroNumber      = char '0' *> (hexadecimal <|> octal <|> decimal <|> pure 0)
+
+decimal         = number 10 digit
+hexadecimal     = oneOf "xX" *> number 16 hexDigit
+octal           = oneOf "oO" *> number 8 octDigit
+
+number base baseDigit
+    = do{ digits <- many1 baseDigit
+        ; let n = foldl (\x d -> base*x + toInteger (digitToInt d)) 0 digits
+        ; seq n (return n)
+        }
+
 
 -- * Helper parsers. Used to parse common AST elements in special ways.
             
