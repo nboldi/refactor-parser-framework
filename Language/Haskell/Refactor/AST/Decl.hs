@@ -5,108 +5,114 @@ import Language.Haskell.Refactor.AST.Base
 import SourceCode.ASTElems
 
 data Decl a
-  = TypeDecl { tdHead :: DeclHead a
-             , tdType :: Type a
+  = TypeDecl { declHead :: DeclHead a
+             , declType :: Type a
              , declInfo :: a
              } -- ^ A type synonym ( @type String = [Char]@ )
-  | TypeFamilyDecl { tfHead :: DeclHead a
-                   , tfKind :: ASTMaybe Kind a
+  | TypeFamilyDecl { declHead :: DeclHead a
+                   , declKind :: ASTMaybe KindConstraint a
                    , declInfo :: a
                    } -- ^ A type family declaration
-  | ClosedTypeFamilyDecl { ctfHead :: DeclHead a
-                         , ctfKind :: ASTMaybe Kind a
-                         , ctfDecl :: ASTList TypeEqn a
+  | ClosedTypeFamilyDecl { declHead :: DeclHead a
+                         , declKind :: ASTMaybe KindConstraint a
+                         , declDecl :: ASTList TypeEqn a
                          , declInfo :: a
                          } -- ^ A closed type family declaration
-  | DataDecl { ddType :: DataOrNewKeyword a
-             , ddCtx  :: ASTMaybe Context a
-             , ddHead :: DeclHead a
-             , ddCons :: ASTList ConDecl a
-             , ddDeriving :: ASTMaybe Deriving a
+  | DataDecl { declNewtype :: DataOrNewtypeKeyword a
+             , declCtx  :: ASTMaybe Context a
+             , declHead :: DeclHead a
+             , declCons :: ASTList ConDecl a
+             , declDeriving :: ASTMaybe Deriving a
              , declInfo :: a
              } -- ^ A data or newtype declaration.
-  | GDataDecl { gddType :: DataOrNewKeyword a
-              , gddCtx  :: ASTMaybe Context a
-              , gddHead :: DeclHead a
-              , gddKind :: ASTMaybe Kind a
-              , gddCons :: ASTList GadtDecl a
-              , gddDeriving :: ASTMaybe Deriving a
+  | GDataDecl { declNewtype :: DataOrNewtypeKeyword a
+              , declCtx  :: ASTMaybe Context a
+              , declHead :: DeclHead a
+              , declKind :: ASTMaybe KindConstraint a
+              , declGadt :: GadtDeclList a
+              , declDeriving :: ASTMaybe Deriving a
               , declInfo :: a
               } -- ^ A data or newtype declaration.
-  | DataFamilyDecl { gddCtx  :: ASTMaybe Context a
-                   , gddHead :: DeclHead a
-                   , gddKind :: ASTMaybe Kind a
+  | DataFamilyDecl { declCtx  :: ASTMaybe Context a
+                   , declHead :: DeclHead a
+                   , declKind :: ASTMaybe KindConstraint a
                    , declInfo :: a
                    } -- ^ Data family declaration
-  | TypeInstDecl { tidInstance :: Type a
-                 , tidAssignedType :: Type a
+  | TypeInstDecl { declInstance :: Type a
+                 , declAssignedType :: Type a
                  , declInfo :: a
                  } -- ^ Type instance declaration (@ type instance Fam T = AssignedT @)
-  | DataInstDecl { didType :: DataOrNewKeyword a
-                 , didInstance :: Type a
-                 , didCons :: ASTList ConDecl a
+  | DataInstDecl { declNewtype :: DataOrNewtypeKeyword a
+                 , declInstance :: Type a
+                 , declCons :: ASTList ConDecl a
                  , declInfo :: a
                  } -- ^ Data instance declaration (@ data instance Fam T = Con1 | Con2 @)
-  | GDataInstDecl { gdidType :: DataOrNewKeyword a
-                  , gdidInstance :: Type a
-                  , gdidKind :: Kind a
-                  , gdidCons :: ASTList GadtDecl a
+  | GDataInstDecl { declNewtype :: DataOrNewtypeKeyword a
+                  , declInstance :: Type a
+                  , declKind :: ASTMaybe KindConstraint a
+                  , declGadt :: GadtDeclList a
                   , declInfo :: a
                   } -- ^ Data instance declaration (@ data instance T = Con1 | Con2 @)
-  | ClassDecl { cdCtx :: Context a
-              , cdHead :: DeclHead a
-              , cdFunDeps :: ASTMaybe FunDeps a
-              , cdBody :: ASTMaybe ClassBody a
+  | ClassDecl { declCtx :: ASTMaybe Context a
+              , declHead :: DeclHead a
+              , declFunDeps :: ASTMaybe FunDeps a
+              , declBody :: ASTMaybe ClassBody a
               , declInfo :: a
               } -- ^ Type class declaration (@ class X a [where f = ...] @)
-  | InstDecl { idOverlap :: ASTMaybe OverlapPragma a
-             , idInstRule :: InstanceRule a
-             , idInstDecl :: ASTMaybe InstBody a
+  | InstDecl { declOverlap :: ASTMaybe OverlapPragma a
+             , declInstRule :: InstanceRule a
+             , declInstDecl :: ASTMaybe InstBody a
              , declInfo :: a
              } -- ^ Instance declaration (@ instance X T [where f = ...] @)
-  | DerivDecl { drdOverlap :: ASTMaybe OverlapPragma a
-              , drdInstRule :: InstanceRule a
+  | DerivDecl { declOverlap :: ASTMaybe OverlapPragma a
+              , declInstRule :: InstanceRule a
               , declInfo :: a
               } -- ^ Standalone deriving declaration (@ deriving instance X T @)
-  | FixityDecl { fdAssoc :: Assoc a
-               , fdPrecedence :: Precedence a
-               , fdOperators :: ASTList Name a
+  | FixityDecl { declAssoc :: Assoc a
+               , declPrecedence :: Precedence a
+               , declOperators :: ASTList Name a
                , declInfo :: a
                }
-  | DefaultDecl { dfdType :: Type a
+  | DefaultDecl { declTypes :: ASTList Type a
                 , declInfo :: a
                 } -- ^ Default types (@ default (T1, T2) @)
-  | SpliceDecl { spdExpr :: Expr a
-               , declInfo :: a
-               } -- ^ A Template Haskell splice declaration (@ $(generateDecls) @)
-  | TypeSignature { tsName :: Name a
-                  , tyType :: Type a
+  | TypeSignature { declName :: Name a
+                  , declType :: Type a
                   , declInfo :: a
                   } -- ^ type signature (@ f :: Int -> Int @)
   | FunBinding { declFunBind :: FunBind a
                , declInfo :: a
                } -- ^ function binding (@ f x = 12 @)
-  | ForeignImport { fiCallConv :: CallConv a
-                  , fiSafety :: ASTMaybe Safety a
-                  , fiName :: Name a
-                  , fiType :: Type a
+  | ForeignImport { declCallConv :: CallConv a
+                  , declSafety :: ASTMaybe Safety a
+                  , declName :: Name a
+                  , declType :: Type a
                   , declInfo :: a
                   } -- ^ foreign import (@ foreign import foo :: Int -> IO Int @)
-  | ForeignExport { feCallConv :: CallConv a
-                  , feName :: Name a
-                  , feType :: Type a
+  | ForeignExport { declCallConv :: CallConv a
+                  , declName :: Name a
+                  , declType :: Type a
                   , declInfo :: a
                   } -- ^ foreign export (@ foreign export ccall foo :: Int -> IO Int @)
   -- | Pragma { tlPragma :: TopLevelPragma a } -- ^ top level pragmas
+  | SpliceDecl { declExpr :: Expr a
+               , declInfo :: a
+               } -- ^ A Template Haskell splice declaration (@ $(generateDecls) @)
   deriving Show
        
-   
 -- | The list of declarations that can appear in a typeclass
 data ClassBody a
   = ClassBody { cbElements :: ASTList ClassElement a
               , cbInfo :: a
               } deriving Show
               
+-- | A list of GADT declarations with the @where@ keyword
+data GadtDeclList a 
+  = GadtDeclList { gadtList :: ASTList GadtDecl a
+                 , gadtInfo :: a
+                 } deriving Show
+                 
+                 
 data ClassElement a
   = ClsDecl { cleDecl :: Decl a
             , cleInfo :: a
@@ -147,13 +153,6 @@ data DeclHead a
              } -- ^ infix application of the type/class name to the left operand
  deriving Show
        
--- | Recognised overlaps for overlap pragmas.       
-data OverlapPragma a
-  = EnableOverlap { overlapInfo :: a } -- ^ NO_OVERLAP pragma
-  | DisableOverlap { overlapInfo :: a } -- ^ OVERLAP pragma
-  | IncoherentOverlap { overlapInfo :: a } -- ^ INCOHERENT pragma
-  deriving Show
-
 data InstBody a
   = InstBody { instBodyDecls :: ASTList InstBodyDecl a
              , instBodyInfo :: a
@@ -168,13 +167,13 @@ data InstBodyDecl a
                          , instBodyRhsType :: Type a
                          , instBodyDeclInfo :: a
                          } -- ^ an associated type definition (@ type A X = B @)
-  | InstBodyDataDecl     { instBodyDataNew :: DataOrNewKeyword a
+  | InstBodyDataDecl     { instBodyDataNew :: DataOrNewtypeKeyword a
                          , instBodyLhsType :: Type a
                          , instBodyDataCons :: ASTList ConDecl a
                          , instBodyDerivings :: ASTMaybe Deriving a
                          , instBodyDeclInfo :: a
                          } -- ^ an associated data type implementation (@ data A X = C1 | C2 @)
-  | InstBodyGadtDataDecl { instBodyDataNew :: DataOrNewKeyword a
+  | InstBodyGadtDataDecl { instBodyDataNew :: DataOrNewtypeKeyword a
                          , instBodyLhsType :: Type a
                          , instBodyDataKind :: ASTMaybe Kind a
                          , instBodyGadtCons :: ASTList GadtDecl a
@@ -270,6 +269,12 @@ data TypeEqn a
             , teRhs :: Type a
             , teInfo :: a
             } -- ^ type equations as found in closed type families (@ T A = S @)
+  deriving Show
+  
+data KindConstraint a 
+  = KindConstraint { kindConstr :: Kind a
+                   , kindConstrInfo :: a
+                   } -- ^ kind constraint (for example on declarations, with @::@)
   deriving Show
    
 -- data TopLevelPragma a

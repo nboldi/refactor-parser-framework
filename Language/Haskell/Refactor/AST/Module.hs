@@ -12,25 +12,27 @@ data Module a
            , modInfo    :: a 
            } deriving Show
 
+-- | Module declaration with name and (optional) exports
 data ModuleHead a
   = ModuleHead { mhName    :: Name a
                , mhExports :: ASTMaybe ExportSpecList a
                , mhInfo    :: a
                } deriving Show
 
+-- | A list of export specifications surrounded by parentheses
 data ExportSpecList a
-  = ExportSpecList { espExports :: ASTList ExportSpec a 
+  = ExportSpecList { espExports :: ASTList IESpec a 
                    , espInfo    :: a
                    } deriving Show
   
-data ExportSpec a
-  = ExportDecl { exportName    :: Name a
-               , exportSubspec :: ASTMaybe ExportSubSpec a
-               , exportInfo    :: a
-               } -- Export a declaration
-  | ExportModule { exportName    :: Name a
-                 , exportInfo    :: a
-                 }
+data IESpec a
+  = IEDecl { ieName    :: Name a
+           , ieSubspec :: ASTMaybe ExportSubSpec a
+           , ieInfo    :: a
+           } -- Import/export a declaration
+  | IEModule { ieName    :: Name a
+             , ieInfo    :: a
+             }
   deriving Show
 
 data ExportSubSpec a
@@ -54,20 +56,34 @@ data ModulePragma a
   deriving Show
                       
 data ImportDecl a
-  = ImportDecl { importModule       :: Name a
-               , importQualified    :: ASTMaybe ImportQualified a
+  = ImportDecl { importQualified    :: ASTMaybe ImportQualified a
                , importSource       :: ASTMaybe ImportSource a
                , importSafe         :: ASTMaybe ImportSafe a
-               , importPkg          :: ASTMaybe Name a
+               , importPkg          :: ASTMaybe PackageName a
+               , importModule       :: Name a
                , importAs           :: ASTMaybe ImportRenaming a
+               , importSpec         :: ASTMaybe ImportSpec a
                , importInfo         :: a
                } -- ^ An import declaration
+  deriving Show
+               
+data ImportSpec a
+  = ImportSpecList   { importSpecList :: ASTList IESpec a
+                     , importSpecInfo :: a
+                     }
+  | ImportSpecHiding { importSpecList :: ASTList IESpec a
+                     , importSpecInfo :: a
+                     } 
   deriving Show
                
 data ImportQualified a  = ImportQualified   { importQualifiedInfo :: a } deriving Show
 data ImportSource a     = ImportSource      { importSourceInfo :: a } deriving Show
 data ImportSafe a       = ImportSafe        { importSafeInfo :: a } deriving Show
 data TypeNamespace a    = TypeNamespace     { typeNamespaceInfo :: a } deriving Show
+
+data PackageName a = PackageName { packageNameStr :: String
+                                 , packageNameInfo :: a 
+                                 } deriving Show
 
 data ImportRenaming a = ImportRenaming { importRenamingName :: Name a
                                        , importRenamingInfo :: a 

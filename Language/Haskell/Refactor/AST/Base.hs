@@ -14,9 +14,9 @@ data SimpleName a
                , simpleNameInfo :: a
                } deriving Show
                    
-data DataOrNewKeyword a
+data DataOrNewtypeKeyword a
   = DataKeyword { dataKeywordInfo :: a }
-  | NewdataKeyword { dataKeywordInfo :: a }
+  | NewtypeKeyword { dataKeywordInfo :: a }
   deriving Show
     
 data DoKind a
@@ -26,6 +26,16 @@ data DoKind a
   
 data TypeKeyword a
   = TypeKeyword { typeKeywordInfo :: a }
+  deriving Show
+  
+-- | Recognised overlaps for overlap pragmas. Can be applied to class declarations and class instance declarations.    
+data OverlapPragma a
+  = EnableOverlap { overlapInfo :: a } -- ^ OVERLAP pragma
+  | DisableOverlap { overlapInfo :: a } -- ^ NO_OVERLAP pragma
+  | Overlappable { overlapInfo :: a } -- ^ OVERLAPPABLE pragma
+  | Overlapping { overlapInfo :: a } -- ^ OVERLAPPING pragma
+  | Overlaps { overlapInfo :: a } -- ^ OVERLAPS pragma
+  | IncoherentOverlap { overlapInfo :: a } -- ^ INCOHERENT pragma
   deriving Show
   
 data CallConv a
