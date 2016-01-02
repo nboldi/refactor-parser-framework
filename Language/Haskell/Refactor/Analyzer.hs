@@ -1,20 +1,24 @@
-{-# LANGUAGE CPP, LambdaCase #-}
+{-# LANGUAGE CPP, LambdaCase, FlexibleInstances #-}
 module Language.Haskell.Refactor.Analyzer where
 
 import Language.Haskell.Refactor.GHC2AST
 
 import GHC
 import Outputable
+import Outputable
 import Bag
 import Var
 import GHC.Paths ( libdir )
  
 import Data.List
+import qualified Data.Map as Map
 import Control.Monad
 import Control.Monad.IO.Class
  
 import DynFlags
 
+instance Show (GenLocated SrcSpan AnnotationComment) where
+  show = show . unLoc
  
 analyze :: String -> IO ()
 analyze moduleName = 
@@ -22,7 +26,7 @@ analyze moduleName =
       runGhc (Just libdir) $ do
         dflags <- getSessionDynFlags
         -- don't generate any code
-        setSessionDynFlags dflags { hscTarget = HscNothing, ghcLink = NoLink }
+        setSessionDynFlags $ gopt_set (dflags { hscTarget = HscNothing, ghcLink = NoLink }) Opt_KeepRawTokenStream
         target <- guessTarget (moduleName ++ ".hs") Nothing
         setTargets [target]
         load LoadAllTargets
@@ -30,9 +34,13 @@ analyze moduleName =
         p <- parseModule modSum
         t <- typecheckModule p
         
-        liftIO $ putStrLn $ show $ trfModule $ pm_parsed_source $ tm_parsed_module t
+        -- liftIO $ putStrLn $ show $ trfModule $ pm_parsed_source $ tm_parsed_module t
         
-        -- liftIO $ putStrLn "==========="
+        liftIO $ putStrLn "==========="
+        
+        liftIO $ putStrLn $ show $ fst $ pm_annotations $ tm_parsed_module t
+        
+        liftIO $ putStrLn $ show $ snd $ pm_annotations $ tm_parsed_module t
         
         -- let mod = pm_parsed_source $ tm_parsed_module t
             -- adtName = msum $ map ((\case TyClD (DataDecl {tcdLName = name}) -> Just (unLoc name); _ -> Nothing) . unLoc) (hsmodDecls (unLoc mod))

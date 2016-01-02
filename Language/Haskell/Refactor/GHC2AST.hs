@@ -55,7 +55,10 @@ trfExport (L l (IEModuleContents n)) = Just (ExportModule (trfModuleNameL n) (tr
 trfExport _ = Nothing -- documentation. TODO: unify ranges
   
 trfImports :: [LImportDecl RdrName] -> ASTList AST.ImportDecl RI
-trfImports = undefined
+trfImports imps = wrapASTList (map trfImport imps) noNodeInfo
+
+trfImport :: LImportDecl RdrName -> AST.ImportDecl RI
+trfImport = undefined
 
 trfDecls :: [LHsDecl RdrName] -> ASTList Decl RI
 trfDecls = undefined
